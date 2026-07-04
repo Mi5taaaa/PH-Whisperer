@@ -182,6 +182,33 @@
     text-align:center;padding:8px 20px 44px;color:var(--soft);
     font-size:12.5px;line-height:1.7;max-width:560px;margin:0 auto;
   }
+
+  /* single-page views */
+  .view[hidden]{display:none}
+  .cta .btn{cursor:pointer}
+  .btn.nav{background:transparent;color:var(--accent)}
+  .btn.nav.active{background:var(--accent);color:#FDFDFB}
+  .viewhead{text-align:center;padding:6px 0 4px}
+  .viewhead h2{font-family:"Fraunces",serif;font-weight:700;
+    font-size:clamp(28px,6vw,38px);line-height:1.12;margin-bottom:8px}
+  .viewhead p{color:var(--soft);font-size:16px;max-width:30em;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:26px 26px 24px;margin-top:20px;
+    box-shadow:0 10px 30px rgba(40,65,74,.06)}
+  .card h2{font-family:"Fraunces",serif;font-weight:600;font-size:22px;margin-bottom:10px}
+  .card p+p{margin-top:12px}
+  .aside{color:var(--soft);font-size:14px;margin-top:12px;
+    border-left:3px solid var(--line);padding-left:14px}
+  code{font-family:"Spline Sans Mono",monospace;font-size:.92em;
+    background:var(--cream);padding:2px 7px;border-radius:6px}
+  figure{margin:18px 0 4px}
+  figcaption{font-size:12.5px;color:var(--soft);margin-top:8px;text-align:center}
+  .usecard{display:flex;gap:16px;align-items:flex-start}
+  .icon{flex:0 0 48px;height:48px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center}
+  .icon svg{width:26px;height:26px;stroke:#28414A;stroke-width:1.8;
+    fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .usecard h2{margin-bottom:6px}
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     .scale .needle,#phValue{transition:none}
@@ -213,17 +240,17 @@
   <div class="kicker">A pH meter, of all things</div>
   <p class="sub">Dip your indicator. Point your camera. Read the number.
   That's the whole lab.</p>
-  <div class="cta">
-    <a class="btn solid" href="#app">Try it now</a>
-    <a class="btn line" href="#how">See how it works ↓</a>
-    <a class="btn line" href="learn.html">The science</a>
-    <a class="btn line" href="uses.html">What it's for</a>
-    <a class="btn line" href="about.html">Our story</a>
+  <div class="cta" id="nav">
+    <button class="btn solid nav active" data-view="app">Try it now</button>
+    <button class="btn nav" data-view="how">How it works</button>
+    <button class="btn nav" data-view="science">The science</button>
+    <button class="btn nav" data-view="uses">What it's for</button>
+    <button class="btn nav" data-view="story">Our story</button>
   </div>
 </section>
 
 <!-- ================= how it works ================= -->
-<section class="how" id="how">
+<section class="how view" id="view-how" hidden>
   <h2>How it works</h2>
   <div class="steps">
     <div class="step"><b>1</b><p>Add a drop of pH indicator to your sample.</p></div>
@@ -234,7 +261,7 @@
 </section>
 
 <!-- ================= the tool ================= -->
-<section class="toolzone" id="app">
+<section class="toolzone view" id="view-app">
 <div class="tool">
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tabMeasure" aria-selected="true" onclick="setMode('measure')">Measure</button>
@@ -330,6 +357,162 @@
   </section>
 </div>
 </section>
+
+<section class="view" id="view-science" hidden>
+  <div class="viewhead">
+    <h2>Why a color can be a number.</h2>
+    <p>The chemistry behind pH Whisperer — from protons to pixels.</p>
+  </div>
+<div class="card">
+  <h2>What pH actually is</h2>
+  <p>pH measures how acidic or basic a solution is by counting its hydrogen
+  ions: <code>pH = −log₁₀[H⁺]</code>. The logarithm is the part people forget —
+  each step of one pH unit means <em>ten times</em> more or fewer hydrogen
+  ions. Lemon juice (~pH 2) isn't a bit more acidic than milk (~pH 6.7); it's
+  tens of thousands of times more acidic. Water sits near 7, and the WHO
+  guideline for drinking water is 6.5–8.5.</p>
+</div>
+
+<div class="card">
+  <h2>Why indicators change color</h2>
+  <p>Light interacts with a substance at the level of its electron orbitals.
+  A pH indicator is a molecule whose structure — and therefore its electron
+  distribution — changes when it gains or loses protons, and protonation is
+  directly tied to the pH of the solution around it.</p>
+  <p>Each of these forms has its own distinct absorbance curve in the visible
+  spectrum: it swallows some wavelengths and lets others pass. The color you
+  see is the light that <em>survives</em>. Change the pH → change the
+  molecule's form → change which wavelengths are absorbed → a different color
+  reaches your eye.</p>
+  <figure>
+    <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" width="100%" role="img"
+         aria-label="Visible spectrum with the absorbed band at 500 to 550 nanometers marked">
+      <defs>
+        <linearGradient id="spec" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"    stop-color="#7A4FB0"/>
+          <stop offset=".18"  stop-color="#3B6FC4"/>
+          <stop offset=".38"  stop-color="#3FA34D"/>
+          <stop offset=".55"  stop-color="#E7C23A"/>
+          <stop offset=".72"  stop-color="#E08A2E"/>
+          <stop offset="1"    stop-color="#C22F22"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="34" width="520" height="34" rx="17" fill="url(#spec)"/>
+      <rect x="168" y="26" width="88" height="50" rx="10" fill="none"
+            stroke="#28414A" stroke-width="2.5" stroke-dasharray="6 5"/>
+      <text x="212" y="16" font-size="12" text-anchor="middle" fill="#28414A"
+            font-family="Archivo,sans-serif" font-weight="600">absorbed (500–550 nm)</text>
+      <text x="440" y="94" font-size="12" text-anchor="middle" fill="#73877F"
+            font-family="Archivo,sans-serif">transmitted (600–750 nm) → what you see</text>
+      <text x="24" y="94" font-size="11" fill="#73877F" font-family="Archivo,sans-serif">400 nm</text>
+      <text x="536" y="94" font-size="11" text-anchor="end" fill="#73877F" font-family="Archivo,sans-serif">750 nm</text>
+    </svg>
+    <figcaption>Our indicator at pH 1: a broad absorbance maximum around
+    500–550 nm removes the green, the orange-red 600–750 nm passes through —
+    and the solution looks carmine red.</figcaption>
+  </figure>
+  <p class="aside">Absorbance is itself a logarithmic scale: one extra unit of
+  absorbance means ten times less light transmitted. pH is a logarithm read
+  through another logarithm — and yet your eye does it effortlessly.</p>
+</div>
+
+<div class="card">
+  <h2>From color to number</h2>
+  <p>If each pH produces a characteristic color, then a photograph of the
+  color carries information about the pH — a camera can do what your eye does,
+  but objectively. The program behind pH Whisperer assigns a pH score to the
+  color it sees, based on a database of reference photos it was trained on.</p>
+  <p>These programs are sensitive to small changes in conditions, which is why
+  every photo includes a gray card as a color reference and why lighting is
+  kept constant.</p>
+</div>
+</section>
+
+<section class="view" id="view-uses" hidden>
+  <div class="viewhead">
+    <h2>One drop, many jobs.</h2>
+    <p>Anywhere a color can speak, pH Whisperer can listen.</p>
+  </div>
+<div class="card usecard">
+  <div class="icon" style="background:#E3EDF8">
+    <svg viewBox="0 0 24 24"><path d="M12 3c0 0-6 7.4-6 11a6 6 0 0 0 12 0c0-3.6-6-11-6-11Z"/></svg>
+  </div>
+  <div>
+  <h2>Water monitoring</h2>
+  <p>Check wells, tanks, rivers or tap water against the WHO guideline band
+  (6.5–8.5), marked right on the scale. A quick first look that tells you
+  when water deserves a proper lab test.</p>
+  </div>
+</div>
+
+<div class="card usecard">
+  <div class="icon" style="background:#E2F1E4">
+    <svg viewBox="0 0 24 24"><path d="M12 21v-8"/><path d="M12 13c0-4 3-6 7-6-0 4-3 6-7 6Z"/><path d="M12 11c0-3.5-2.5-5-6-5 0 3.5 2.5 5 6 5Z"/></svg>
+  </div>
+  <div>
+  <h2>Soil pH for gardens</h2>
+  <p>Mix a spoonful of soil with twice as much distilled water, shake, let it
+  settle, and read the clear layer above. Soil pH decides which nutrients
+  plants can actually absorb.</p>
+  </div>
+</div>
+
+<div class="card usecard">
+  <div class="icon" style="background:#F9E8DA">
+    <svg viewBox="0 0 24 24"><path d="M10 3h4"/><path d="M10 3v6L5 18a2.5 2.5 0 0 0 2.2 3.7h9.6A2.5 2.5 0 0 0 19 18l-5-9V3"/><path d="M8.5 15h7"/></svg>
+  </div>
+  <div>
+  <h2>School laboratories</h2>
+  <p>One teacher calibrates, prints the QR code, and every student's phone
+  becomes an instrument — the whole class measures at the same time.</p>
+  </div>
+</div>
+
+<div class="card usecard">
+  <div class="icon" style="background:#ECE6F5">
+    <svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg>
+  </div>
+  <div>
+  <h2>Learning at home</h2>
+  <p>Boil red cabbage for a homemade indicator and test the kitchen — lemon,
+  soap, vinegar, milk. Everyday liquids are safe; stronger ones belong in
+  adult hands.</p>
+  </div>
+</div>
+
+<div class="card usecard">
+  <div class="icon" style="background:#F5EEDC">
+    <svg viewBox="0 0 24 24"><path d="M3 12c3-4 7-6 11-4 3 1.5 5 4 7 4-2 0-4 2.5-7 4-4 2-8 0-11-4Z"/><circle cx="16.5" cy="11" r=".8"/></svg>
+  </div>
+  <div>
+  <h2>And beyond</h2>
+  <p>Aquariums and hydroponics live by pH — and any test strip that answers
+  in color (nitrate, chlorine, hardness) could be read the same way.</p>
+  </div>
+</div>
+</section>
+
+<section class="view" id="view-story" hidden>
+  <div class="viewhead">
+    <h2>Why we made this.</h2>
+  </div>
+<div class="card">
+  <p>pH Whisperer began as a project for a chemistry × AI conference, where
+  we — Amina and Luca — presented our invention: a program that reads the pH
+  of a solution from the color of its indicator. We're 11th-grade students at
+  Tudor Vianu National Computer Science College.</p>
+  <p>After the conference, a simple fact kept bothering us: a good pH meter
+  costs from tens to hundreds of euros, needs calibration buffers, storage
+  solution, and careful maintenance, while a phone with a camera is already
+  in almost everyone's pocket. So we rebuilt the idea as a free web app: for
+  schools that can't buy a meter for every bench, for anyone checking their
+  water or soil, for kids discovering chemistry at home.</p>
+  <p>Every reading comes with a ± value, and the app tells you when a color
+  is unlike anything it has been calibrated on instead of inventing a
+  confident number.</p>
+</div>
+</section>
+
 </div>
 
 <footer>
@@ -644,6 +827,31 @@ function setMode(m){
   $("actionBtn").textContent = m==="measure"?"Read pH":"Capture reference";
 }
 renderCal();
+
+/* ---------------- single-page view switching ---------------- */
+const VIEWS=["app","how","science","uses","story"];
+function showView(name){
+  if(!VIEWS.includes(name)) name="app";
+  VIEWS.forEach(v=>{
+    const s=document.getElementById("view-"+v);
+    if(s) s.hidden = v!==name;
+  });
+  document.querySelectorAll("#nav .nav").forEach(b=>{
+    const on=b.dataset.view===name;
+    b.classList.toggle("active",on);
+    b.classList.toggle("solid",on);
+  });
+  if(!location.hash.startsWith("#cal="))
+    try{ history.replaceState(null,"","#"+name); }catch(e){ /* sandboxed preview: no history access */ }
+}
+document.querySelectorAll("#nav .nav").forEach(b=>
+  b.addEventListener("click",()=>showView(b.dataset.view)));
+window.addEventListener("hashchange",()=>{
+  const h=location.hash.slice(1);
+  if(!h.startsWith("cal=")) showView(h);
+});
+/* initial view: a share link opens the app; otherwise honor the hash */
+showView(location.hash.startsWith("#cal=") ? "app" : location.hash.slice(1));
 
 </script>
 </body>
