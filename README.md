@@ -36,4 +36,10 @@ Created by Amina Asan and Luca Aurelian Anghelescu, students at Colegiul Națion
 Informatică "Tudor Vianu", București, as part of a project on low-cost
 colorimetric water screening.
 
+## License
 
+Copyright (c) 2026 Amina Asan and Luca Aurelian Anghelescu.
+
+This project is source-available under the PolyForm Noncommercial 1.0.0
+license (see the LICENSE file): you may use, copy, and modify it for any
+noncommercial purpose. Commercial use requires our permission — contact us.
