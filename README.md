@@ -32,17 +32,17 @@ drink.
 
 ## Repository layout
 
-index.html — page structure; the file GitHub Pages serves
-css/style.css — all styling (pastel theme, layout, quiz cards)
-js/app.js — camera, color math, pH prediction, calibration, share codes, QR
-js/quiz.js — learning mode: question generators, scoring, streaks
-js/substances.js — the substance database the quiz draws from (edit this
+* index.html — page structure; the file GitHub Pages serves
+* css/style.css — all styling (pastel theme, layout, quiz cards)
+* js/app.js — camera, color math, pH prediction, calibration, share codes, QR
+* js/quiz.js — learning mode: question generators, scoring, streaks
+* js/substances.js — the substance database the quiz draws from (edit this
 file to grow the question pool; format documented inside)
-research/ — the Python research pipeline: leakage-safe model training
+* research/ — the Python research pipeline: leakage-safe model training
 (grouped cross-validation), feature extraction, and a Flask prototype.
 Not needed to run the site; kept as the scientific basis of the project.
-LICENCE — PolyForm Noncommercial 1.0.0
-.github/workflows/ — the action that deploys the site on every commit
+* LICENCE — PolyForm Noncommercial 1.0.0
+* .github/workflows/ — the action that deploys the site on every commit
 
 ## Credits
 
