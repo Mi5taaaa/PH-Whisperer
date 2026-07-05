@@ -30,7 +30,7 @@ hydroponics. It is not a certified instrument, and a pH inside the WHO
 drinking-water guideline (6.5–8.5) does not by itself mean water is safe to
 drink.
 
-##Repository layout
+## Repository layout
 
 index.html — page structure; the file GitHub Pages serves
 css/style.css — all styling (pastel theme, layout, quiz cards)
