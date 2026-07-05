@@ -8,212 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-  :root{
-    --cream:#F3F7F1; --card:#FFFFFF; --line:#DCE7DC;
-    --ink:#28414A; --soft:#73877F; --accent:#4F9367;
-    --warn:#B07A2A; --reading:#28414A;
-  }
-  *{box-sizing:border-box;margin:0}
-  html{scroll-behavior:smooth}
-  body{
-    background:linear-gradient(180deg,#FBF0E6 0%,#EEF6EE 45%,#E9F0F8 100%);
-    background-attachment:fixed;color:var(--ink);
-    font-family:"Archivo",system-ui,sans-serif;font-size:16px;line-height:1.55;
-  }
-  .wrap{max-width:560px;margin:0 auto;padding:0 20px}
-
-  /* ================= hero ================= */
-  .hero{padding:64px 0 56px;text-align:center}
-  .mascot{width:110px;height:auto;margin:0 auto 22px;display:block}
-  .kicker{
-    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--soft);font-weight:600;margin-bottom:14px;
-  }
-  h1{
-    font-family:"Fraunces",serif;font-weight:700;
-    font-size:clamp(40px,9vw,58px);line-height:1.06;
-    letter-spacing:-.01em;margin-bottom:18px;
-  }
-  .sub{color:var(--soft);font-size:18px;max-width:26em;margin:0 auto 30px}
-  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .btn{
-    display:inline-block;padding:14px 26px;border-radius:999px;
-    font:600 15px "Archivo",sans-serif;text-decoration:none;cursor:pointer;
-    border:1.5px solid var(--accent);
-  }
-  .btn.solid{background:var(--accent);color:#FDFDFB}
-  .btn.line{color:var(--accent);background:transparent}
-  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-
-  /* ================= how it works ================= */
-  .how{padding:8px 0 48px}
-  h2{
-    font-family:"Fraunces",serif;font-weight:600;font-size:30px;
-    text-align:center;margin-bottom:26px;
-  }
-  .steps{display:grid;gap:14px}
-  .step{
-    background:var(--card);border:1px solid var(--line);border-radius:18px;
-    padding:18px 20px;display:flex;gap:16px;align-items:baseline;
-  }
-  .step b{
-    font-family:"Fraunces",serif;font-size:26px;font-weight:700;
-    color:var(--accent);min-width:1.2em;
-  }
-  .step p{font-size:15px;color:var(--ink)}
-  .step p span{color:var(--soft)}
-
-  /* ================= the tool ================= */
-  .toolzone{padding:10px 0 60px}
-  .tool{
-    background:var(--card);border:1px solid var(--line);border-radius:24px;
-    overflow:hidden;box-shadow:0 10px 30px rgba(40,65,74,.08);
-  }
-  .tabs{display:flex;padding:14px 14px 0;gap:8px}
-  .tab{
-    flex:1;padding:11px;border:1.5px solid var(--line);border-radius:999px;
-    background:transparent;color:var(--soft);
-    font:600 13px "Archivo",sans-serif;letter-spacing:.06em;
-    text-transform:uppercase;cursor:pointer;
-  }
-  .tab[aria-selected="true"]{background:var(--accent);color:#FDFDFB;border-color:var(--accent)}
-  .tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-
-  .stage{position:relative;background:#171310;aspect-ratio:4/3;overflow:hidden;
-    margin:14px;border-radius:16px}
-  video,#still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  #still{display:none}
-  .reticle{
-    position:absolute;left:50%;top:50%;translate:-50% -50%;
-    width:24%;aspect-ratio:1;border-radius:50%;
-    border:2px solid #FFFCF5;
-    box-shadow:0 0 0 4000px rgba(15,11,8,.28);pointer-events:none;
-  }
-  .reticle::after{
-    content:"sample";position:absolute;left:50%;top:calc(100% + 6px);translate:-50%;
-    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#FFFCF5;
-  }
-  .graybox{
-    position:absolute;left:12%;top:50%;translate:0 -50%;
-    width:12%;aspect-ratio:1;border:2px dashed #FFFCF5;pointer-events:none;
-  }
-  .graybox::after{
-    content:"gray";position:absolute;left:50%;top:calc(100% + 5px);translate:-50%;
-    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#FFFCF5;
-  }
-  .offline{
-    position:absolute;inset:0;display:none;flex-direction:column;gap:8px;
-    align-items:center;justify-content:center;color:#C9BBA8;
-    font-size:13px;text-align:center;padding:24px;
-  }
-
-  .grayrow{display:flex;align-items:flex-start;gap:8px;padding:0 20px;
-    font-size:12.5px;color:var(--soft)}
-  .grayrow input{margin-top:3px}
-
-  .controls{display:flex;gap:10px;padding:14px 20px 6px}
-  button,.filebtn{
-    flex:1;padding:14px 10px;border:1.5px solid var(--line);border-radius:999px;
-    background:var(--card);color:var(--ink);
-    font:600 14px "Archivo",sans-serif;cursor:pointer;text-align:center;
-  }
-  button.primary{background:var(--accent);color:#FDFDFB;border-color:var(--accent)}
-  button.ghost{background:transparent}
-  button:focus-visible,.filebtn:focus-within{outline:2px solid var(--ink);outline-offset:2px}
-  input[type=file]{display:none}
-
-  section.pane{padding:12px 20px 26px}
-
-  .row{display:flex;align-items:baseline;justify-content:space-between;margin-top:6px}
-  .label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
-  #phValue{
-    font-family:"Spline Sans Mono",monospace;font-weight:600;
-    font-size:64px;line-height:1.05;color:var(--reading);transition:color .4s;
-  }
-  #phUnc{font-family:"Spline Sans Mono",monospace;font-size:15px;color:var(--soft)}
-  #verdict{font-size:13.5px;margin-top:4px;min-height:18px;line-height:1.5}
-  #verdict.warn{color:var(--warn)}
-
-  .scale{position:relative;margin-top:18px;height:38px}
-  .scale .bar{height:12px;border-radius:999px;background:linear-gradient(90deg,
-    #C22F22 0%, #DF6C2A 17%, #E7C23A 33%, #59A64C 50%,
-    #2E8C86 62%, #2F5FA8 76%, #5B2E91 100%)}
-  .scale .who{position:absolute;top:-4px;height:20px;border:1.5px solid var(--ink);
-    border-radius:6px;opacity:.5;left:44%;width:16%}
-  .scale .needle{position:absolute;top:-7px;width:2.5px;height:26px;background:var(--ink);
-    border-radius:2px;left:0;transition:left .5s cubic-bezier(.2,.8,.2,1)}
-  .scale .ticks{display:flex;justify-content:space-between;margin-top:7px;
-    font-family:"Spline Sans Mono",monospace;font-size:10px;color:var(--soft)}
-
-  .calform{display:flex;gap:10px;align-items:stretch}
-  .calform input[type=number],.calform input[type=text]{
-    padding:12px 14px;border:1.5px solid var(--line);border-radius:999px;
-    background:var(--cream);color:var(--ink);
-  }
-  .calform input[type=number]{width:110px;font:600 16px "Spline Sans Mono",monospace}
-  .calform input[type=text]{flex:1;min-width:0;font:400 14px "Archivo",sans-serif}
-  .calform input:focus-visible{outline:2px solid var(--ink)}
-  .hint{font-size:12.5px;color:var(--soft);margin:10px 0 14px;line-height:1.55}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);
-     text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
-  td{padding:8px 4px;border-bottom:1px solid var(--line);
-     font-family:"Spline Sans Mono",monospace}
-  td .swatch{display:inline-block;width:18px;height:18px;border-radius:6px;
-     vertical-align:middle;margin-right:8px;border:1px solid rgba(58,44,33,.15)}
-  td button{flex:0;padding:4px 12px;font-size:12px}
-  .demo-tag{font-size:9px;letter-spacing:.1em;color:var(--warn);
-    text-transform:uppercase;margin-left:6px}
-  .iorow{display:flex;gap:10px;margin-top:14px}
-  #codeBox{
-    width:100%;margin-top:10px;padding:12px 14px;border:1.5px solid var(--line);
-    border-radius:14px;background:var(--cream);color:var(--ink);
-    font:400 13px "Spline Sans Mono",monospace;word-break:break-all;
-    line-height:1.6;display:none;
-  }
-  .sharehead{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--soft);margin-top:24px}
-  .qrwrap{background:#fff;padding:16px;border-radius:18px;border:1px solid var(--line);
-    width:max-content;margin:14px auto 0}
-  .qrwrap img,.qrwrap canvas{display:block;width:208px;height:208px}
-
-  footer{
-    text-align:center;padding:8px 20px 44px;color:var(--soft);
-    font-size:12.5px;line-height:1.7;max-width:560px;margin:0 auto;
-  }
-
-  /* single-page views */
-  .view[hidden]{display:none}
-  .cta .btn{cursor:pointer}
-  .btn.nav{background:transparent;color:var(--accent)}
-  .btn.nav.active{background:var(--accent);color:#FDFDFB}
-  .viewhead{text-align:center;padding:6px 0 4px}
-  .viewhead h2{font-family:"Fraunces",serif;font-weight:700;
-    font-size:clamp(28px,6vw,38px);line-height:1.12;margin-bottom:8px}
-  .viewhead p{color:var(--soft);font-size:16px;max-width:30em;margin:0 auto}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;
-    padding:26px 26px 24px;margin-top:20px;
-    box-shadow:0 10px 30px rgba(40,65,74,.06)}
-  .card h2{font-family:"Fraunces",serif;font-weight:600;font-size:22px;margin-bottom:10px}
-  .card p+p{margin-top:12px}
-  .aside{color:var(--soft);font-size:14px;margin-top:12px;
-    border-left:3px solid var(--line);padding-left:14px}
-  code{font-family:"Spline Sans Mono",monospace;font-size:.92em;
-    background:var(--cream);padding:2px 7px;border-radius:6px}
-  figure{margin:18px 0 4px}
-  figcaption{font-size:12.5px;color:var(--soft);margin-top:8px;text-align:center}
-  .usecard{display:flex;gap:16px;align-items:flex-start}
-  .icon{flex:0 0 48px;height:48px;border-radius:14px;
-    display:flex;align-items:center;justify-content:center}
-  .icon svg{width:26px;height:26px;stroke:#28414A;stroke-width:1.8;
-    fill:none;stroke-linecap:round;stroke-linejoin:round}
-  .usecard h2{margin-bottom:6px}
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    .scale .needle,#phValue{transition:none}
-  }
-</style>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -242,6 +37,7 @@
   That's the whole lab.</p>
   <div class="cta" id="nav">
     <button class="btn solid nav active" data-view="app">Try it now</button>
+    <button class="btn nav" data-view="learn">Quiz</button>
     <button class="btn nav" data-view="how">How it works</button>
     <button class="btn nav" data-view="science">The science</button>
     <button class="btn nav" data-view="uses">What it's for</button>
@@ -306,6 +102,9 @@
       <div class="needle" id="needle" style="left:0%"></div>
       <div class="ticks"><span>1</span><span>4</span><span>7</span><span>10</span><span>13.5</span></div>
     </div>
+    <div class="iorow" id="quizOffer" hidden>
+      <button class="ghost" id="quizOfferBtn"></button>
+    </div>
   </section>
 
   <section class="pane" id="paneCal" hidden>
@@ -356,6 +155,44 @@
     </div>
   </section>
 </div>
+</section>
+
+
+<section class="view" id="view-learn" hidden>
+  <div class="viewhead">
+    <h2>Learning mode</h2>
+    <p>Five questions per round, generated from a pH — scanned or random.</p>
+  </div>
+  <div class="card">
+    <div class="quizbar">
+      <span class="chip" id="quizPhChip">pH 7</span>
+      <span class="chip" id="quizStreak">🔥 0</span>
+      <span style="flex:1"></span>
+      <button class="pill sm active" id="diffNormal" onclick="setDifficulty('normal')">Normal</button>
+      <button class="pill sm" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
+      <button class="pill sm" onclick="startRandomQuiz()">🎲 Random pH</button>
+    </div>
+    <div id="quizCard" hidden>
+      <div class="label" id="quizProgress"></div>
+      <p id="quizPrompt" class="qprompt"></p>
+      <div id="quizOptions"></div>
+      <div class="calform" id="quizNumRow" hidden>
+        <input type="number" step="any" id="quizNum" placeholder="answer">
+        <button class="primary" onclick="submitNum()">Check</button>
+      </div>
+      <p id="quizFeedback" class="qfeedback"></p>
+      <div class="iorow"><button class="primary" id="quizNext" onclick="nextQuestion()" hidden>Next →</button></div>
+    </div>
+    <div id="quizSummary" hidden style="text-align:center">
+      <div class="label">round score</div>
+      <div id="quizScoreLine" class="qscore"></div>
+      <p id="quizVerdictLine" class="hint"></p>
+      <div class="iorow">
+        <button onclick="startQuiz(Q.ph,Q.fromScan)">Same pH again</button>
+        <button class="primary" onclick="startRandomQuiz()">🎲 New random pH</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="view" id="view-science" hidden>
@@ -524,335 +361,8 @@
 </footer>
 
 <canvas id="work" hidden></canvas>
-<script>
-"use strict";
-const $ = id => document.getElementById(id);
-let mode = "measure", usingStill = false;
-
-/* ============ demo calibration (approximate universal-indicator colors)
-   Replace with your own: capture references, then Export. ============ */
-let calibration = [
-  {ph:1,  rgb:[200,49,36],  demo:true},
-  {ph:3,  rgb:[224,110,45], demo:true},
-  {ph:5,  rgb:[229,194,60], demo:true},
-  {ph:7,  rgb:[92,166,78],  demo:true},
-  {ph:8.5,rgb:[49,140,134], demo:true},
-  {ph:10.5,rgb:[50,96,168], demo:true},
-  {ph:12, rgb:[74,60,150],  demo:true},
-  {ph:13.5,rgb:[91,46,145], demo:true},
-];
-
-/* ---------------- camera ---------------- */
-(async () => {
-  try {
-    const s = await navigator.mediaDevices.getUserMedia(
-      {video:{facingMode:"environment"}, audio:false});
-    $("cam").srcObject = s;
-  } catch(e){ $("cam").hidden = true; $("camMsg").style.display = "flex"; }
-})();
-
-$("fileIn").addEventListener("change", ev => {
-  const f = ev.target.files[0]; if(!f) return;
-  const still = $("still");
-  still.src = URL.createObjectURL(f);
-  still.style.display = "block"; $("cam").style.display = "none";
-  usingStill = true;
-  still.onload = () => capture();
-});
-
-/* ---------------- color math ---------------- */
-function medianPatch(ctx,cx,cy,half){
-  const d = ctx.getImageData(cx-half,cy-half,half*2,half*2).data;
-  const ch=[[],[],[]];
-  for(let i=0;i<d.length;i+=4){ch[0].push(d[i]);ch[1].push(d[i+1]);ch[2].push(d[i+2]);}
-  return ch.map(a=>{a.sort((x,y)=>x-y);return a[a.length>>1];});
-}
-function whiteBalance(rgb,gray){
-  if(!gray) return rgb.slice();
-  const t=(gray[0]+gray[1]+gray[2])/3;
-  return rgb.map((v,i)=>Math.min(255,Math.max(0,v*t/Math.max(gray[i],1e-6))));
-}
-function rgb2lab(rgb){
-  let [r,g,b]=rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);
-  let x=(.4124564*r+.3575761*g+.1804375*b)/.95047,
-      y=(.2126729*r+.7151522*g+.0721750*b),
-      z=(.0193339*r+.1191920*g+.9503041*b)/1.08883;
-  const f=t=>t>0.008856?Math.cbrt(t):t/0.128418+4/29;
-  const fx=f(x),fy=f(y),fz=f(z);
-  return [116*fy-16,500*(fx-fy),200*(fy-fz)];
-}
-const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
-
-/* k-nearest-neighbor, inverse-distance-weighted interpolation in Lab space */
-function predict(lab){
-  const pts = calibration.map(c=>({ph:c.ph, d:dist(lab, c.lab || (c.lab=rgb2lab(c.rgb)))}))
-                         .sort((a,b)=>a.d-b.d).slice(0,4);
-  if(pts.length===0) return null;
-  if(pts[0].d < 1e-6) return {ph:pts[0].ph, spread:0, nearest:0};
-  const w = pts.map(p=>1/(p.d*p.d));
-  const W = w.reduce((s,x)=>s+x,0);
-  const ph = pts.reduce((s,p,i)=>s+w[i]*p.ph,0)/W;
-  const spread = Math.sqrt(pts.reduce((s,p,i)=>s+w[i]*(p.ph-ph)**2,0)/W);
-  return {ph, spread, nearest:pts[0].d};
-}
-
-/* ---------------- capture ---------------- */
-function grabColors(){
-  const src = usingStill ? $("still") : $("cam");
-  const w = usingStill ? src.naturalWidth : src.videoWidth;
-  const h = usingStill ? src.naturalHeight : src.videoHeight;
-  if(!w) throw new Error("no image yet — allow the camera or upload a photo");
-  const work=$("work"); work.width=w; work.height=h;
-  const ctx=work.getContext("2d",{willReadFrequently:true});
-  ctx.drawImage(src,0,0,w,h);
-  const sample = medianPatch(ctx,(w/2)|0,(h/2)|0,(w*.055)|0);
-  const gray = $("useGray").checked
-      ? medianPatch(ctx,(w*.18)|0,(h/2)|0,(w*.04)|0) : null;
-  return {sample, gray};
-}
-
-function capture(){
-  let colors;
-  try{ colors = grabColors(); }
-  catch(e){ setVerdict(e.message,true); return; }
-  const balanced = whiteBalance(colors.sample, colors.gray);
-
-  if(mode==="calibrate"){
-    const ph = parseFloat($("calPh").value);
-    if(Number.isNaN(ph)){ alert("Enter the known pH of this reference first."); return; }
-    calibration = calibration.filter(c=>!c.demo);   // first real point retires the demo set
-    calibration.push({ph, rgb:balanced.map(Math.round)});
-    renderCal();
-  } else {
-    showPrediction(predict(rgb2lab(balanced)));
-  }
-}
-
-/* ---------------- measure UI ---------------- */
-const STOPS=[[1,"#C22F22"],[3,"#DF6C2A"],[5,"#E7C23A"],[7,"#59A64C"],
-             [8.5,"#2E8C86"],[10.5,"#2F5FA8"],[13.5,"#5B2E91"]];
-function phColor(ph){
-  for(let i=1;i<STOPS.length;i++) if(ph<=STOPS[i][0]){
-    const [p0,c0]=STOPS[i-1],[p1,c1]=STOPS[i],t=(ph-p0)/(p1-p0);
-    const hex=s=>[1,3,5].map(k=>parseInt(s.slice(k,k+2),16));
-    const a=hex(c0),b=hex(c1);
-    return `rgb(${a.map((v,k)=>Math.round(v+t*(b[k]-v))).join(",")})`;
-  }
-  return STOPS.at(-1)[1];
-}
-function setVerdict(msg,warn){const v=$("verdict");v.className=warn?"warn":"";v.textContent=msg;}
-function inkify(c){ // darken a tint so it reads well on the cream background
-  const m=c.match(/\d+/g).map(Number);
-  return `rgb(${m.map(v=>Math.round(v*0.72)).join(",")})`;
-}
-function showPrediction(p){
-  if(!p){ setVerdict("No calibration points yet — add references in the Calibrate tab.",true); return; }
-  const ph=Math.min(13.5,Math.max(1,p.ph));
-  $("phValue").textContent=ph.toFixed(2);
-  document.documentElement.style.setProperty("--reading",inkify(phColor(ph)));
-  const unc=Math.max(p.spread,0.1);
-  $("phUnc").textContent="± "+unc.toFixed(2);
-  $("needle").style.left=((ph-1)/12.5*100).toFixed(1)+"%";
-  const demo=calibration.some(c=>c.demo);
-  if(p.nearest>18)
-    setVerdict("Low confidence — this color is far from every calibration point. Check lighting, the gray card, and glare.",true);
-  else if(demo)
-    setVerdict("Reading uses the built-in DEMO calibration. Calibrate with your own indicator before trusting values.",true);
-  else if(ph>=6.5&&ph<=8.5)
-    setVerdict("Within the WHO drinking-water pH guideline (6.5–8.5).");
-  else
-    setVerdict("Outside the WHO drinking-water pH guideline (6.5–8.5).",true);
-}
-
-/* ---------------- calibrate UI ---------------- */
-function renderCal(){
-  const tb=$("calTable").querySelector("tbody");
-  tb.innerHTML="";
-  calibration.slice().sort((a,b)=>a.ph-b.ph).forEach(c=>{
-    const tr=document.createElement("tr");
-    const lab=c.lab||(c.lab=rgb2lab(c.rgb));
-    tr.innerHTML=
-      `<td><span class="swatch" style="background:rgb(${c.rgb.map(Math.round).join(",")})"></span>${c.demo?'<span class="demo-tag">demo</span>':''}</td>
-       <td>${c.ph.toFixed(1)}</td>
-       <td>L ${lab[0].toFixed(0)}</td><td></td>`;
-    const del=document.createElement("button");
-    del.textContent="remove"; del.className="ghost";
-    del.onclick=()=>{calibration=calibration.filter(x=>x!==c);renderCal();};
-    tr.lastElementChild.appendChild(del);
-    tb.appendChild(tr);
-  });
-}
-function exportCal(){
-  const data=calibration.filter(c=>!c.demo).map(({ph,rgb})=>({ph,rgb}));
-  if(!data.length){alert("Nothing to export yet — capture at least one real reference.");return;}
-  const blob=new Blob([JSON.stringify({app:"pH Whisperer",version:1,points:data},null,2)],
-                      {type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="ph-whisperer-calibration.json";
-  a.click();
-}
-$("calIn").addEventListener("change",ev=>{
-  const f=ev.target.files[0]; if(!f) return;
-  f.text().then(t=>{
-    try{
-      const j=JSON.parse(t);
-      if(!Array.isArray(j.points)) throw 0;
-      calibration=j.points.map(p=>({ph:+p.ph,rgb:p.rgb.map(Number)}));
-      renderCal();
-      setVerdict(`Imported ${calibration.length} calibration points.`);
-    }catch(e){alert("That file doesn't look like a pH Whisperer calibration.");}
-  });
-});
-
-/* ---------------- share codes ----------------
-   The code IS the calibration: version + name + points packed into
-   bytes, base64url-encoded, with a checksum to catch typos. */
-const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-let lastCode=null;
-
-function encodeCal(name){
-  const pts=calibration.filter(c=>!c.demo);
-  if(!pts.length) return null;
-  const nm=(name||"").slice(0,16);
-  const bytes=[1, nm.length];                       // version, name length
-  for(const ch of nm) bytes.push(ch.charCodeAt(0)&255);
-  bytes.push(pts.length);
-  for(const p of pts){
-    bytes.push(Math.max(0,Math.min(140,Math.round(p.ph*10))));   // pH*10 in 1 byte
-    p.rgb.forEach(v=>bytes.push(Math.max(0,Math.min(255,Math.round(v)))));
-  }
-  bytes.push(bytes.reduce((s,b)=>s+b,0)&255);       // checksum
-  let out="";
-  for(let i=0;i<bytes.length;i+=3){
-    const b0=bytes[i], b1=bytes[i+1]??0, b2=bytes[i+2]??0;
-    out+=B64[b0>>2]+B64[((b0&3)<<4)|(b1>>4)]+B64[((b1&15)<<2)|(b2>>6)]+B64[b2&63];
-  }
-  return out.match(/.{1,4}/g).join(".");            // dots for readability
-}
-
-function decodeCal(code){
-  const clean=(code||"").trim().replace(/[.\s]/g,"");
-  if(!clean) throw new Error("empty code");
-  const idx=[...clean].map(c=>B64.indexOf(c));
-  if(idx.some(v=>v<0)) throw new Error("the code contains invalid characters");
-  const bytes=[];
-  for(let i=0;i<idx.length;i+=4){
-    const c=idx.slice(i,i+4);
-    bytes.push((c[0]<<2)|((c[1]??0)>>4));
-    if(c.length>2) bytes.push(((c[1]&15)<<4)|(c[2]>>2));
-    if(c.length>3) bytes.push(((c[2]&3)<<6)|c[3]);
-  }
-  let p=0;
-  if(bytes[p++]!==1) throw new Error("unknown code version");
-  const nLen=bytes[p++];
-  let name=""; for(let i=0;i<nLen;i++) name+=String.fromCharCode(bytes[p++]);
-  const count=bytes[p++];
-  if(!count || p+count*4>bytes.length) throw new Error("the code looks truncated");
-  const pts=[];
-  for(let i=0;i<count;i++)
-    pts.push({ph:bytes[p++]/10, rgb:[bytes[p++],bytes[p++],bytes[p++]]});
-  const sum=bytes.slice(0,p).reduce((s,b)=>s+b,0)&255;
-  if(bytes[p]!==sum) throw new Error("checksum failed — the code was mistyped or cut off");
-  return {name, pts};
-}
-
-function makeCode(){
-  const code=encodeCal($("shareName").value);
-  const box=$("codeBox");
-  $("qrArea").style.display="none";
-  if(!code){box.style.display="block";box.textContent="Capture at least one real reference first — demo points are not shared.";return;}
-  lastCode=code;
-  box.style.display="block"; box.textContent=code;
-  $("copyRow").style.display="flex";
-}
-function copyCode(){
-  if(!lastCode) return;
-  navigator.clipboard?.writeText(lastCode).then(
-    ()=>setVerdict("Code copied."),
-    ()=>prompt("Copy this:",lastCode));
-}
-function showQR(){
-  if(!lastCode) return;
-  if(typeof QRCode==="undefined"){
-    setVerdict("The QR generator couldn't load — check the internet connection and reload the page.",true);
-    return;
-  }
-  const isWeb=/^https?:$/.test(location.protocol);
-  const payload=isWeb
-    ? location.origin+location.pathname+"#cal="+lastCode
-    : lastCode;
-  const t=$("qrTarget"); t.innerHTML="";
-  new QRCode(t,{text:payload,width:512,height:512,
-                correctLevel:QRCode.CorrectLevel.M});
-  $("qrCaption").textContent=isWeb
-    ? "Scanning opens pH Whisperer with this calibration already loaded. Save it and print it on your gray card."
-    : "Offline preview: this QR carries the raw code (paste it into the app). Once the app is published online, regenerate here to get a QR that opens the app directly.";
-  $("qrArea").style.display="block";
-}
-function saveQR(){
-  const cv=$("qrTarget").querySelector("canvas");
-  const img=$("qrTarget").querySelector("img");
-  const url=cv?cv.toDataURL("image/png"):(img?img.src:null);
-  if(!url) return;
-  const a=document.createElement("a");
-  a.href=url; a.download="ph-whisperer-calibration-qr.png"; a.click();
-}
-function loadCode(){
-  try{
-    const {name,pts}=decodeCal($("codeIn").value);
-    calibration=pts; renderCal();
-    setVerdict(`Loaded calibration ${name?`“${name}” `:""}— ${pts.length} points. Measure away.`);
-    $("codeIn").value="";
-  }catch(e){ setVerdict("Could not load: "+e.message,true); }
-}
-/* auto-load a calibration carried inside a share link */
-(function(){
-  const m=location.hash.match(/cal=([A-Za-z0-9\-_.%]+)/);
-  if(!m) return;
-  try{
-    const {name,pts}=decodeCal(decodeURIComponent(m[1]));
-    calibration=pts;
-    setVerdict(`Loaded calibration ${name?`“${name}” `:""}from the link — ${pts.length} points.`);
-  }catch(e){ setVerdict("The link carried a calibration code, but it could not be read.",true); }
-})();
-
-/* ---------------- tabs ---------------- */
-function setMode(m){
-  mode=m;
-  $("tabMeasure").setAttribute("aria-selected",m==="measure");
-  $("tabCal").setAttribute("aria-selected",m==="calibrate");
-  $("paneMeasure").hidden = m!=="measure";
-  $("paneCal").hidden = m!=="calibrate";
-  $("actionBtn").textContent = m==="measure"?"Read pH":"Capture reference";
-}
-renderCal();
-
-/* ---------------- single-page view switching ---------------- */
-const VIEWS=["app","how","science","uses","story"];
-function showView(name){
-  if(!VIEWS.includes(name)) name="app";
-  VIEWS.forEach(v=>{
-    const s=document.getElementById("view-"+v);
-    if(s) s.hidden = v!==name;
-  });
-  document.querySelectorAll("#nav .nav").forEach(b=>{
-    const on=b.dataset.view===name;
-    b.classList.toggle("active",on);
-    b.classList.toggle("solid",on);
-  });
-  if(!location.hash.startsWith("#cal="))
-    try{ history.replaceState(null,"","#"+name); }catch(e){ /* sandboxed preview: no history access */ }
-}
-document.querySelectorAll("#nav .nav").forEach(b=>
-  b.addEventListener("click",()=>showView(b.dataset.view)));
-window.addEventListener("hashchange",()=>{
-  const h=location.hash.slice(1);
-  if(!h.startsWith("cal=")) showView(h);
-});
-/* initial view: a share link opens the app; otherwise honor the hash */
-showView(location.hash.startsWith("#cal=") ? "app" : location.hash.slice(1));
-
-</script>
+<script src="js/substances.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
