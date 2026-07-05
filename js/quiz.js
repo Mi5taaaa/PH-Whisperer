@@ -8,7 +8,7 @@
 /* ---------- helpers ---------- */
 const Q = {
   ph: 7, difficulty: "normal", idx: 0, score: 0, questions: [],
-  streak: 0, fromScan: false,
+  fromScan: false,
 };
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
@@ -26,11 +26,28 @@ function convenientConc(n){
   return {v: 10**(3+12-n)/1000, u: "pmol/L"};
 }
 
+/* swatch color for a pH (same gradient the app uses) */
+const SW_STOPS=[[1,"#C22F22"],[3,"#DF6C2A"],[5,"#E7C23A"],[7,"#59A64C"],[8.5,"#2E8C86"],[10.5,"#2F5FA8"],[13.5,"#5B2E91"]];
+function phSwatchColor(ph){
+  for(let i=1;i<SW_STOPS.length;i++) if(ph<=SW_STOPS[i][0]){
+    const [p0,c0]=SW_STOPS[i-1],[p1,c1]=SW_STOPS[i],t=(ph-p0)/(p1-p0);
+    const hex=s=>[1,3,5].map(k=>parseInt(s.slice(k,k+2),16));
+    const a=hex(c0),b=hex(c1);
+    return `rgb(${a.map((v,k)=>Math.round(v+t*(b[k]-v))).join(",")})`;
+  }
+  return SW_STOPS.at(-1)[1];
+}
+
 /* ---------- question generators ----------
    Each returns {prompt, type:'mc'|'num', options?, answer, explain}
    or null when it doesn't apply to this pH.                    */
 
 const GEN_NORMAL = [
+  function estimateFromColor(ph){
+    return {prompt:"This swatch is the color your universal indicator shows. Estimate its pH (±0.75 accepted):",
+      type:"num", answer:ph, tol:0.75, swatch:phSwatchColor(ph),
+      explain:`This shade sits at about pH ${fmt(ph)} on the indicator scale. Training your eye is the whole game.`};
+  },
   function indicatorColor(ph){
     const color = ph<=2?"Red":ph<=4?"Orange":ph<=6?"Yellow":ph<7.6?"Green":ph<=9?"Blue-green":ph<=11?"Blue":"Violet";
     const others = ["Red","Orange","Yellow","Green","Blue-green","Blue","Violet"].filter(c=>c!==color);
@@ -145,6 +162,32 @@ const GEN_NORMAL = [
 ];
 
 const GEN_HARD = [
+  function henderson(ph){
+    const k = rnd([-2,-1,1,2]);
+    const pka = ph - k;
+    if(pka < 1 || pka > 13 || !isInt(ph)) return null;
+    return {prompt:`An acid with pKa ${fmt(pka)} sits in your pH ${fmt(ph)} solution. The ratio [A⁻]/[HA] = 10ˣ. What is x? (x can be negative)`,
+      type:"num", answer:k,
+      explain:`Henderson–Hasselbalch: pH = pKa + log([A⁻]/[HA]), so x = pH − pKa = ${fmt(ph)} − ${fmt(pka)} = ${k}.`};
+  },
+  function mixing(ph){
+    if(!isInt(ph) || ph > 5) return null;
+    const right = `≈ pH ${fmt(ph+0.3)}`;
+    return {prompt:`You mix equal volumes of two strong-acid solutions: pH ${fmt(ph)} and pH ${fmt(ph+2)}. The mixture's pH is…`,
+      type:"mc",
+      options:shuffle([right,`pH ${fmt(ph+1)} (the average)`,`pH ${fmt(ph)}`,`pH ${fmt(ph+2)}`]),
+      answer:right,
+      explain:`Concentrations average, not pH: [H⁺] ≈ (10⁻${ph} + 10⁻${ph+2})/2 ≈ 10⁻${ph}/2, and log₁₀2 ≈ 0.3, so pH ≈ ${fmt(ph+0.3)}. The stronger acid dominates.`};
+  },
+  function dilutionTrap(ph){
+    const k = 8 - Math.round(ph);
+    if(!isInt(ph) || k < 2 || k > 6) return null;
+    const right = "Just below 7";
+    return {prompt:`You dilute your strong acid (pH ${fmt(ph)}) by a factor of 10^${k}. Naively that gives pH ${Math.round(ph)+k} — what is the real pH?`,
+      type:"mc", options:shuffle([right,`pH ${Math.round(ph)+k}`,"Exactly 7",`pH ${fmt(ph)}`]),
+      answer:right,
+      explain:`Dilution can never push an acid past neutral: near 10⁻⁷ M, water's own autoionization dominates and pH approaches 7 from below.`};
+  },
   function ratioExponent(ph){
     const k = rnd([2,3,4]);
     if(ph + k > 13.5) return null;
@@ -200,40 +243,57 @@ const GEN_HARD = [
   },
 ];
 
-/* ---------- daily streak (remembers between visits on this device) ---------- */
+/* ---------- daily streaks: separate per difficulty ----------
+   A day counts only if you score >= 4/5. Miss one day and a freeze
+   (earned every 7-day milestone, max 2) is spent automatically. */
 function loadDaily(){
-  try{ return JSON.parse(localStorage.getItem("phw_daily")) || {last:"",streak:0,best:0}; }
-  catch(e){ return {last:"",streak:0,best:0}; }
+  try{
+    const d = JSON.parse(localStorage.getItem("phw_daily_v2"));
+    if(d && d.normal && d.hard) return d;
+  }catch(e){}
+  return {normal:{last:"",streak:0,best:0,freezes:0},
+          hard:  {last:"",streak:0,best:0,freezes:0}};
 }
-function saveDaily(d){ try{ localStorage.setItem("phw_daily", JSON.stringify(d)); }catch(e){} }
-function markDailyRound(){
-  const d = loadDaily();
-  const today = new Date().toISOString().slice(0,10);
-  if(d.last === today) { /* already counted today */ }
-  else {
-    const y = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    d.streak = (d.last === y) ? d.streak + 1 : 1;
-    d.last = today;
-    if(d.streak > d.best) d.best = d.streak;
-    saveDaily(d);
+function saveDaily(d){ try{ localStorage.setItem("phw_daily_v2", JSON.stringify(d)); }catch(e){} }
+const dayStr = off => new Date(Date.now()+off*86400000).toISOString().slice(0,10);
+
+function markDailyRound(diff, score){
+  if(score >= 4){
+    const all = loadDaily(), d = all[diff], today = dayStr(0);
+    if(d.last !== today){
+      if(d.last === dayStr(-1)) d.streak++;
+      else if(d.last === dayStr(-2) && d.freezes > 0){ d.freezes--; d.streak++; }
+      else d.streak = 1;
+      d.last = today;
+      if(d.streak > d.best) d.best = d.streak;
+      if(d.streak % 7 === 0) d.freezes = Math.min(d.freezes+1, 2);
+      saveDaily(all);
+    }
   }
-  updateDailyChip(d);
+  updateStreakUI();
 }
-function updateDailyChip(d){
-  d = d || loadDaily();
-  const el = qel("quizDaily");
-  if(el) el.textContent = "📅 " + d.streak + (d.best>d.streak ? " (best "+d.best+")" : "");
+function updateStreakUI(){
+  const d = loadDaily()[Q.difficulty];
+  const s = qel("quizDaily");
+  if(s) s.textContent = "📅 " + d.streak + (d.best>d.streak ? " (best "+d.best+")" : "");
+  const f = qel("quizFreeze");
+  if(f) f.textContent = "🧊 " + d.freezes;
+  const r = qel("streakReminder");
+  if(r) r.hidden = (d.last === dayStr(0));
 }
 
 /* ---------- round construction ---------- */
 function buildRound(ph, difficulty){
-  const pool = difficulty === "hard" ? [...GEN_HARD, ...GEN_NORMAL] : [...GEN_NORMAL];
   const qs = [];
-  for(const gen of shuffle(pool)){
-    const q = gen(ph);
-    if(q) qs.push(q);
-    if(qs.length === 5) break;
-  }
+  const take = (pool, max)=>{
+    for(const gen of shuffle(pool)){
+      const q = gen(ph);
+      if(q) qs.push(q);
+      if(qs.length === max) return;
+    }
+  };
+  if(difficulty === "hard"){ take(GEN_HARD, 3); take(GEN_NORMAL, 5); }
+  else take(GEN_NORMAL, 5);
   return qs;
 }
 function randomPh(){
@@ -249,7 +309,7 @@ function startQuiz(ph, fromScan){
   Q.idx = 0; Q.score = 0;
   Q.questions = buildRound(Q.ph, Q.difficulty);
   qel("quizPhChip").textContent = "pH " + fmt(Q.ph);
-  updateDailyChip();
+  updateStreakUI();
   showView("learn");
   renderQuestion();
 }
@@ -269,6 +329,8 @@ function renderQuestion(){
   qel("quizCard").hidden = false;
   qel("quizProgress").textContent = `Question ${Q.idx+1} / ${Q.questions.length}`;
   qel("quizPrompt").textContent = q.prompt;
+  const sw = qel("quizSwatch");
+  if(sw){ sw.hidden = !q.swatch; if(q.swatch) sw.style.background = q.swatch; }
   qel("quizFeedback").textContent = "";
   qel("quizFeedback").className = "qfeedback";
   qel("quizNext").hidden = true;
@@ -292,7 +354,7 @@ function submitNum(){
   const q = Q.questions[Q.idx];
   const v = parseFloat(qel("quizNum").value.replace(",", "."));
   if(Number.isNaN(v)) return;
-  answer(Math.abs(v - q.answer) < 0.051, q);
+  answer(Math.abs(v - q.answer) < (q.tol || 0.051), q);
 }
 function answer(correct, q, btn){
   document.querySelectorAll("#quizOptions .qopt").forEach(b=>{
@@ -302,9 +364,8 @@ function answer(correct, q, btn){
   if(btn && !correct) btn.classList.add("wrong");
   qel("quizNumRow").hidden = true;
   const f = qel("quizFeedback");
-  if(correct){ Q.score++; Q.streak++; f.textContent = "Correct! " + q.explain; f.className = "qfeedback ok"; }
-  else { Q.streak = 0; f.textContent = `Not quite — the answer is ${q.answer}. ` + q.explain; f.className = "qfeedback bad"; }
-  qel("quizStreak").textContent = "🔥 " + Q.streak;
+  if(correct){ Q.score++; f.textContent = "Correct! " + q.explain; f.className = "qfeedback ok"; }
+  else { f.textContent = `Not quite — the answer is ${q.answer}. ` + q.explain; f.className = "qfeedback bad"; }
   qel("quizNext").hidden = false;
 }
 function nextQuestion(){
@@ -312,7 +373,7 @@ function nextQuestion(){
   if(Q.idx < Q.questions.length) renderQuestion();
   else {
     qel("quizCard").hidden = true;
-    markDailyRound();
+    markDailyRound(Q.difficulty, Q.score);
     const s = qel("quizSummary"); s.hidden = false;
     qel("quizScoreLine").textContent = `${Q.score} / ${Q.questions.length}`;
     qel("quizVerdictLine").textContent =

@@ -146,6 +146,8 @@ function showPrediction(p){
 
 /* ---------------- calibrate UI ---------------- */
 function renderCal(){
+  const badge=$("betaBadge");
+  if(badge) badge.hidden = !calibration.some(c=>c.demo);
   const tb=$("calTable").querySelector("tbody");
   tb.innerHTML="";
   calibration.slice().sort((a,b)=>a.ph-b.ph).forEach(c=>{

@@ -9,7 +9,8 @@ between user-made calibration points — with an uncertainty value on every
 reading, and an explicit low-confidence warning when the color is unlike
 anything calibrated.
 
-**Live app:** phwhisperer.com
+**Live app:** https://mi5taaaa.github.io/PH-Whisperer/ *(update after
+enabling GitHub Pages — see guides/PUBLISHING_GUIDE.md)*
 
 ## How it works
 
@@ -18,7 +19,7 @@ anything calibrated.
    your range is a good start.
 2. **Share** — the whole calibration packs into a short code with a checksum.
    Share the code, or generate a QR that opens the app with the calibration
-   pre-loaded. 
+   pre-loaded. No server, no accounts, no expiry.
 3. **Measure** — frame the sample in the circle with the gray card visible,
    press Read pH.
 
@@ -32,17 +33,17 @@ drink.
 
 ## Repository layout
 
-* index.html — page structure; the file GitHub Pages serves
-* css/style.css — all styling (pastel theme, layout, quiz cards)
-* js/app.js — camera, color math, pH prediction, calibration, share codes, QR
-* js/quiz.js — learning mode: question generators, scoring, streaks
-* js/substances.js — the substance database the quiz draws from (edit this
-file to grow the question pool; format documented inside)
-* research/ — the Python research pipeline: leakage-safe model training
-(grouped cross-validation), feature extraction, and a Flask prototype.
-Not needed to run the site; kept as the scientific basis of the project.
-* LICENCE — PolyForm Noncommercial 1.0.0
-* .github/workflows/ — the action that deploys the site on every commit
+- `index.html` — page structure; the file GitHub Pages serves
+- `css/style.css` — all styling (pastel theme, layout, quiz cards)
+- `js/app.js` — camera, color math, pH prediction, calibration, share codes, QR
+- `js/quiz.js` — learning mode: question generators, scoring, streaks
+- `js/substances.js` — the substance database the quiz draws from (edit this
+  file to grow the question pool; format documented inside)
+- `research/` — the Python research pipeline: leakage-safe model training
+  (grouped cross-validation), feature extraction, and a Flask prototype.
+  Not needed to run the site; kept as the scientific basis of the project.
+- `LICENCE` — PolyForm Noncommercial 1.0.0
+- `.github/workflows/` — the action that deploys the site on every commit
 
 ## Credits
 
@@ -54,6 +55,6 @@ colorimetric water screening.
 
 Copyright (c) 2026 Amina Asan and Luca Aurelian Anghelescu.
 
-This project is source-available under the PolyForm Noncommercial 1.0.0
-license (see the LICENSE file): you may use, copy, and modify it for any
+This project is source-available under the **PolyForm Noncommercial 1.0.0**
+license (see the `LICENSE` file): you may use, copy, and modify it for any
 noncommercial purpose. Commercial use requires our permission — contact us.

@@ -225,3 +225,9 @@
 .qfeedback.ok{color:var(--accent)}
 .qfeedback.bad{color:#B04A3A}
 .qscore{font-family:"Fraunces",serif;font-weight:700;font-size:44px;margin:6px 0}
+
+.remind{margin-bottom:14px;padding:10px 14px;border:1.5px solid #E8C98A;
+  background:#FBF3DF;border-radius:12px;font-size:12.5px;color:#8A6A1F;line-height:1.5}
+.qswatch{height:56px;border-radius:14px;border:1px solid var(--line);margin:2px 0 12px}
+.beta{margin:14px 14px 0;padding:10px 14px;border:1.5px solid #E8C98A;
+  background:#FBF3DF;border-radius:12px;font-size:12.5px;color:#8A6A1F;line-height:1.5}
