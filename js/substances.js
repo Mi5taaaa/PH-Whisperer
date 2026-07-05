@@ -11,7 +11,6 @@
    ============================================================ */
 
 const SUBSTANCES = [
-  // --- SAMPLE ENTRIES (replace with your ~100) ---
   { name: "Battery acid",        ph: 0.8 },
   { name: "Gastric acid",        ph: 1.5 },
   { name: "Lemon juice",         ph: 2.4 },
