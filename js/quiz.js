@@ -11,6 +11,7 @@ const Q = {
   fromScan: false,
 };
 const rnd = a => a[Math.floor(Math.random() * a.length)];
+const pv = (...opts) => rnd(opts);
 const shuffle = a => a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
 const fmt = x => (Math.round(x*100)/100).toString();
 const isInt = x => Math.abs(x - Math.round(x)) < 1e-9;
@@ -27,7 +28,7 @@ function convenientConc(n){
 }
 
 /* swatch color for a pH (same gradient the app uses) */
-const SW_STOPS=[[1,"#C22F22"],[3,"#DF6C2A"],[5,"#E7C23A"],[7,"#59A64C"],[8.5,"#2E8C86"],[10.5,"#2F5FA8"],[13.5,"#5B2E91"]];
+const SW_STOPS=[[1,"#EF4E23"],[2,"#F7941D"],[3,"#FFF200"],[4,"#BFD730"],[5,"#8DC63F"],[6,"#39B54A"],[7,"#00A651"],[8,"#00A878"],[9,"#00AAA6"],[10,"#4BA6DF"],[11,"#2E5FA3"],[12,"#4D4D9F"],[13,"#662D91"],[13.5,"#52258B"]];
 function phSwatchColor(ph){
   for(let i=1;i<SW_STOPS.length;i++) if(ph<=SW_STOPS[i][0]){
     const [p0,c0]=SW_STOPS[i-1],[p1,c1]=SW_STOPS[i],t=(ph-p0)/(p1-p0);
@@ -43,17 +44,47 @@ function phSwatchColor(ph){
    or null when it doesn't apply to this pH.                    */
 
 const GEN_NORMAL = [
+  function litmus(ph){
+    if(ph > 6.4 && ph < 7.6) return null;
+    const right = ph < 7 ? "Blue litmus turns red" : "Red litmus turns blue";
+    return {prompt:`You dip litmus paper into your pH ${fmt(ph)} solution. What happens?`,
+      type:"mc", options:shuffle(["Blue litmus turns red","Red litmus turns blue","Neither paper changes color"]),
+      answer:right,
+      explain:`Acids (pH<7) turn blue litmus red; bases turn red litmus blue. Litmus is a one-bit pH meter.`};
+  },
+  function moreIons(ph){
+    if(ph > 6.4 && ph < 7.6) return null;
+    const right = ph < 7 ? "H⁺ ions" : "OH⁻ ions";
+    return {prompt:pv(
+      `In your pH ${fmt(ph)} solution, which ions outnumber the other?`,
+      `pH ${fmt(ph)}: which ion is winning, H⁺ or OH⁻?`),
+      type:"mc", options:["H⁺ ions","OH⁻ ions","Exactly equal amounts"], answer:right,
+      explain:`Below 7, H⁺ dominates; above 7, OH⁻ does. They're equal only at neutral.`};
+  },
+  function pohToPh(ph){
+    return {prompt:`A different solution has pOH ${fmt(14-ph)}. What is its pH?`,
+      type:"num", answer:ph,
+      explain:`pH = 14 − pOH = 14 − ${fmt(14-ph)} = ${fmt(ph)}.`};
+  },
+  function factorToNeutral(ph){
+    const k = Math.abs(7-ph);
+    if(k < 0.9 || !isInt(ph)) return null;
+    return {prompt:`To bring your pH ${fmt(ph)} to neutral, [H⁺] must ${ph<7?"decrease":"increase"} by a factor of 10ˣ. What is x?`,
+      type:"num", answer:k,
+      explain:`Each pH unit is one factor of 10, and neutral is ${k} unit${k>1?"s":""} away.`};
+  },
   function estimateFromColor(ph){
     return {prompt:"This swatch is the color your universal indicator shows. Estimate its pH (±0.75 accepted):",
       type:"num", answer:ph, tol:0.75, swatch:phSwatchColor(ph),
       explain:`This shade sits at about pH ${fmt(ph)} on the indicator scale. Training your eye is the whole game.`};
   },
   function indicatorColor(ph){
-    const color = ph<=2?"Red":ph<=4?"Orange":ph<=6?"Yellow":ph<7.6?"Green":ph<=9?"Blue-green":ph<=11?"Blue":"Violet";
-    const others = ["Red","Orange","Yellow","Green","Blue-green","Blue","Violet"].filter(c=>c!==color);
+    const color = ph<=1.5?"Red":ph<=2.5?"Orange":ph<=3.5?"Yellow":ph<=5.5?"Yellow-green"
+      :ph<=7.5?"Green":ph<=9.5?"Blue-green":ph<=11.5?"Blue":"Violet";
+    const others = ["Red","Orange","Yellow","Yellow-green","Green","Blue-green","Blue","Violet"].filter(c=>c!==color);
     return {prompt:`Roughly what color would a universal indicator show at pH ${fmt(ph)}?`,
       type:"mc", options:shuffle([color,...shuffle(others).slice(0,3)]), answer:color,
-      explain:`Universal indicator runs red → orange → yellow → green (≈7) → blue → violet as pH rises; at ${fmt(ph)} it sits at ${color.toLowerCase()}.`};
+      explain:`On the universal-indicator chart, pH ${fmt(ph)} sits at ${color.toLowerCase()}.`};
   },
   function ionProduct(ph){
     const right = "10⁻¹⁴ mol²/L²";
@@ -80,17 +111,27 @@ const GEN_NORMAL = [
       explain:`Lower pH = more H⁺. The scale runs backwards from the concentration.`};
   },
   function pOH(ph){
-    return {prompt:`Your solution has pH ${fmt(ph)}. What is its pOH?`,
+    const wording = rnd([
+      `Your solution has pH ${fmt(ph)}. What is its pOH?`,
+      `pH ${fmt(ph)} — quick: pOH = ?`,
+      `A classmate measured pOH instead of pH. Your reading is pH ${fmt(ph)}; what should their number be?`]);
+    return {prompt:wording,
       type:"num", answer:14-ph,
       explain:`pH + pOH = 14 (at 25 °C), so pOH = 14 − ${fmt(ph)} = ${fmt(14-ph)}.`};
   },
   function hExponent(ph){
-    return {prompt:`At pH ${fmt(ph)}, the concentration of H⁺ ions is 10⁻ˣ mol/L. What is x?`,
+    const wording2 = rnd([
+      `At pH ${fmt(ph)}, the concentration of H⁺ ions is 10⁻ˣ mol/L. What is x?`,
+      `Write [H⁺] of your pH ${fmt(ph)} solution as a power of ten: 10⁻ˣ mol/L. x = ?`]);
+    return {prompt:wording2,
       type:"num", answer:ph,
       explain:`pH = −log₁₀[H⁺], so [H⁺] = 10⁻ᵖᴴ = 10^−${fmt(ph)} mol/L.`};
   },
   function ohExponent(ph){
-    return {prompt:`At pH ${fmt(ph)}, the concentration of OH⁻ ions is 10⁻ʸ mol/L. What is y?`,
+    return {prompt:pv(
+      `At pH ${fmt(ph)}, the concentration of OH⁻ ions is 10⁻ʸ mol/L. What is y?`,
+      `Flip side: at pH ${fmt(ph)}, [OH⁻] = 10⁻ʸ mol/L. Find y.`,
+      `Your solution reads pH ${fmt(ph)}. How concentrated are the OH⁻ ions, as 10⁻ʸ mol/L?`),
       type:"num", answer:14-ph,
       explain:`[H⁺][OH⁻] = 10⁻¹⁴, so [OH⁻] = 10^−(14−pH) = 10^−${fmt(14-ph)} mol/L.`};
   },
@@ -108,7 +149,10 @@ const GEN_NORMAL = [
   },
   function classify(ph){
     const right = ph < 6.9 ? "Acidic" : ph > 7.1 ? "Basic" : "Neutral";
-    return {prompt:`A solution with pH ${fmt(ph)} is…`,
+    return {prompt:pv(
+      `A solution with pH ${fmt(ph)} is…`,
+      `Classify your pH ${fmt(ph)} sample:`,
+      `pH ${fmt(ph)} — acidic, neutral, or basic?`),
       type:"mc", options:["Acidic","Neutral","Basic"], answer:right,
       explain:`pH below 7 is acidic, 7 is neutral, above 7 is basic.`};
   },
@@ -162,6 +206,40 @@ const GEN_NORMAL = [
 ];
 
 const GEN_HARD = [
+  function phFromKa(ph){
+    if(!isInt(ph) || ph < 2 || ph > 6) return null;
+    const pC = rnd([1,2]);
+    const pKa = 2*ph - pC;
+    if(pKa <= 0 || pKa > 12) return null;
+    return {prompt:`A weak acid has Ka = 10⁻${pKa}. What pH does its ${pC===1?"0.1":"0.01"} M solution have?`,
+      type:"num", answer:ph,
+      explain:`pH ≈ (pKa + pC)/2 = (${pKa} + ${pC})/2 = ${fmt(ph)} for a weak acid. (The inverse of estimating Ka from pH.)`};
+  },
+  function conjugatePair(ph){
+    return {prompt:`For any conjugate acid–base pair in water at 25 °C, pKa + pKb equals…`,
+      type:"mc", options:shuffle(["14","7","0","28"]), answer:"14",
+      explain:`Ka·Kb = Kw = 10⁻¹⁴, so pKa + pKb = 14 — the pair always splits the water constant between them.`};
+  },
+  function saltHydrolysis(ph){
+    const basic = rnd([true,false]);
+    const right = basic ? "Basic" : "Acidic";
+    return {prompt: basic
+      ? `You dissolve in pure water the salt of a WEAK acid and a STRONG base (like sodium acetate). The solution turns out…`
+      : `You dissolve in pure water the salt of a STRONG acid and a WEAK base (like ammonium chloride). The solution turns out…`,
+      type:"mc", options:shuffle(["Acidic","Basic","Neutral"]), answer:right,
+      explain: basic
+      ? `The weak-acid anion steals H⁺ from water, leaving OH⁻ behind — hydrolysis makes it basic.`
+      : `The weak-base cation donates H⁺ to water — hydrolysis makes it acidic.`};
+  },
+  function bestBuffer(ph){
+    if(ph < 3 || ph > 11 || !isInt(ph)) return null;
+    const right = `One with pKa ≈ ${fmt(ph)}`;
+    return {prompt:`You need a buffer that holds your measured pH ${fmt(ph)} steady. Which acid should you build it from?`,
+      type:"mc",
+      options:shuffle([right,`One with pKa ≈ ${fmt(ph-2)}`,`One with pKa ≈ ${fmt(ph+2)}`,"Any acid — pKa doesn't matter"]),
+      answer:right,
+      explain:`A buffer resists change best where pH = pKa: there the acid and its conjugate base are equally stocked in both directions.`};
+  },
   function henderson(ph){
     const k = rnd([-2,-1,1,2]);
     const pka = ph - k;
@@ -282,18 +360,49 @@ function updateStreakUI(){
   if(r) r.hidden = (d.last === dayStr(0));
 }
 
+/* generator families: one question per family per round, so three
+   "what's the exponent" questions can't crowd a single round */
+const FAM = {pOH:"exp",hExponent:"exp",ohExponent:"exp",convenientUnit:"exp",
+  classify:"class",whichMoreAcidic:"class",timesMoreAcidic:"ratio",
+  ratioExponent:"ratio",protonation:"pka",henderson:"pka",halfIonized:"pka",
+  kaEstimate:"kx",kbEstimate:"kx",ionization:"kx",substanceQ:"subst",
+  safety:"safety",indicatorColor:"color",estimateFromColor:"color",
+  ionProduct:"kw",neutralize:"neut",dilution:"dilut",dilutionTrap:"dilut",mixing:"mix",
+  pohToPh:"exp",factorToNeutral:"ratio",litmus:"class",moreIons:"class",
+  phFromKa:"kx",conjugatePair:"kw",saltHydrolysis:"salt",bestBuffer:"pka"};
+let lastRoundGens = new Set();
+
 /* ---------- round construction ---------- */
 function buildRound(ph, difficulty){
-  const qs = [];
-  const take = (pool, max)=>{
+  const qs = [], usedFams = new Set(), usedGens = new Set();
+  const take = (pool, max, strict)=>{
     for(const gen of shuffle(pool)){
-      const q = gen(ph);
-      if(q) qs.push(q);
-      if(qs.length === max) return;
+      if(qs.length >= max) return;
+      const fam = FAM[gen.name] || gen.name;
+      if(usedFams.has(fam) || usedGens.has(gen.name)) continue;
+      if(strict && lastRoundGens.has(gen.name)) continue;  // fresh vs last round
+      const question = gen(ph);
+      if(!question) continue;
+      question._gen = gen.name;
+      qs.push(question); usedFams.add(fam); usedGens.add(gen.name);
     }
   };
-  if(difficulty === "hard"){ take(GEN_HARD, 3); take(GEN_NORMAL, 5); }
-  else take(GEN_NORMAL, 5);
+  // one hand-written question when the bank has a match for this pH
+  if(typeof CUSTOM_QUESTIONS !== "undefined"){
+    const pool = CUSTOM_QUESTIONS.filter(c =>
+      ph >= c.min && ph <= c.max &&
+      (c.mode === "any" || c.mode === difficulty) &&
+      !lastRoundGens.has("custom:"+c.prompt));
+    if(pool.length && Math.random() < 0.8){
+      const c = rnd(pool);
+      qs.push({prompt:c.prompt, type:"mc", options:shuffle([...c.options]),
+               answer:c.answer, explain:c.explain, _gen:"custom:"+c.prompt});
+    }
+  }
+  if(difficulty === "hard"){ take(GEN_HARD, 3, true); take(GEN_NORMAL, 5, true);
+                             take(GEN_HARD, 3, false); take(GEN_NORMAL, 5, false); }
+  else { take(GEN_NORMAL, 5, true); take(GEN_NORMAL, 5, false); }
+  lastRoundGens = new Set(qs.map(x=>x._gen));
   return qs;
 }
 function randomPh(){

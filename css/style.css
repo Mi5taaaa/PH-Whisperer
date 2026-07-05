@@ -127,9 +127,7 @@
   #verdict.warn{color:var(--warn)}
 
   .scale{position:relative;margin-top:18px;height:38px}
-  .scale .bar{height:12px;border-radius:999px;background:linear-gradient(90deg,
-    #C22F22 0%, #DF6C2A 17%, #E7C23A 33%, #59A64C 50%,
-    #2E8C86 62%, #2F5FA8 76%, #5B2E91 100%)}
+  .scale .bar{height:12px;border-radius:999px;background:linear-gradient(90deg,#EF4E23 0%,#F7941D 8%,#FFF200 16%,#BFD730 24%,#8DC63F 32%,#39B54A 40%,#00A651 48%,#00A878 56%,#00AAA6 64%,#4BA6DF 72%,#2E5FA3 80%,#4D4D9F 88%,#662D91 96%,#52258B 100%)}
   .scale .who{position:absolute;top:-4px;height:20px;border:1.5px solid var(--ink);
     border-radius:6px;opacity:.5;left:44%;width:16%}
   .scale .needle{position:absolute;top:-7px;width:2.5px;height:26px;background:var(--ink);

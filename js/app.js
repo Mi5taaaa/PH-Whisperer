@@ -102,8 +102,7 @@ function capture(){
 }
 
 /* ---------------- measure UI ---------------- */
-const STOPS=[[1,"#C22F22"],[3,"#DF6C2A"],[5,"#E7C23A"],[7,"#59A64C"],
-             [8.5,"#2E8C86"],[10.5,"#2F5FA8"],[13.5,"#5B2E91"]];
+const STOPS=[[1,"#EF4E23"],[2,"#F7941D"],[3,"#FFF200"],[4,"#BFD730"],[5,"#8DC63F"],[6,"#39B54A"],[7,"#00A651"],[8,"#00A878"],[9,"#00AAA6"],[10,"#4BA6DF"],[11,"#2E5FA3"],[12,"#4D4D9F"],[13,"#662D91"],[13.5,"#52258B"]];
 function phColor(ph){
   for(let i=1;i<STOPS.length;i++) if(ph<=STOPS[i][0]){
     const [p0,c0]=STOPS[i-1],[p1,c1]=STOPS[i],t=(ph-p0)/(p1-p0);
