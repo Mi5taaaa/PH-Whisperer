@@ -31,6 +31,37 @@ function convenientConc(n){
    or null when it doesn't apply to this pH.                    */
 
 const GEN_NORMAL = [
+  function indicatorColor(ph){
+    const color = ph<=2?"Red":ph<=4?"Orange":ph<=6?"Yellow":ph<7.6?"Green":ph<=9?"Blue-green":ph<=11?"Blue":"Violet";
+    const others = ["Red","Orange","Yellow","Green","Blue-green","Blue","Violet"].filter(c=>c!==color);
+    return {prompt:`Roughly what color would a universal indicator show at pH ${fmt(ph)}?`,
+      type:"mc", options:shuffle([color,...shuffle(others).slice(0,3)]), answer:color,
+      explain:`Universal indicator runs red → orange → yellow → green (≈7) → blue → violet as pH rises; at ${fmt(ph)} it sits at ${color.toLowerCase()}.`};
+  },
+  function ionProduct(ph){
+    const right = "10⁻¹⁴ mol²/L²";
+    return {prompt:`In your solution at pH ${fmt(ph)} (25 °C), what is the product [H⁺]·[OH⁻]?`,
+      type:"mc", options:shuffle([right,"10⁻⁷ mol²/L²","10⁻²⁸ mol²/L²","It depends on the pH"]),
+      answer:right,
+      explain:`Kw = [H⁺][OH⁻] = 10⁻¹⁴ at 25 °C for every aqueous solution — the two always trade off, whatever the pH.`};
+  },
+  function neutralize(ph){
+    if(ph > 6.4 && ph < 7.6) return null;
+    const right = ph < 7 ? "Add a base" : "Add an acid";
+    return {prompt:`You want to bring your pH ${fmt(ph)} solution toward neutral. What do you add?`,
+      type:"mc", options:shuffle(["Add an acid","Add a base","Nothing — it is already neutral"]),
+      answer:right,
+      explain:`pH ${fmt(ph)} is ${ph<7?"acidic, so a base neutralizes the excess H⁺":"basic, so an acid neutralizes the excess OH⁻"}.`};
+  },
+  function whichMoreAcidic(ph){
+    const d = rnd([1,1.5,2,3]) * rnd([-1,1]);
+    const other = Math.round((ph+d)*2)/2;
+    if(other < 1 || other > 13.5) return null;
+    const right = `pH ${fmt(Math.min(ph,other))}`;
+    return {prompt:`Which solution has the higher concentration of H⁺ ions: pH ${fmt(ph)} or pH ${fmt(other)}?`,
+      type:"mc", options:[`pH ${fmt(ph)}`,`pH ${fmt(other)}`].sort(), answer:right,
+      explain:`Lower pH = more H⁺. The scale runs backwards from the concentration.`};
+  },
   function pOH(ph){
     return {prompt:`Your solution has pH ${fmt(ph)}. What is its pOH?`,
       type:"num", answer:14-ph,
@@ -114,6 +145,20 @@ const GEN_NORMAL = [
 ];
 
 const GEN_HARD = [
+  function ratioExponent(ph){
+    const k = rnd([2,3,4]);
+    if(ph + k > 13.5) return null;
+    return {prompt:`Solution A has your pH ${fmt(ph)}; solution B has pH ${fmt(ph+k)}. [H⁺]ₐ / [H⁺]ᵦ = 10ˣ. What is x?`,
+      type:"num", answer:k,
+      explain:`[H⁺]ₐ/[H⁺]ᵦ = 10⁻${fmt(ph)}/10⁻${fmt(ph+k)} = 10^(${fmt(ph+k)}−${fmt(ph)}) = 10^${k}.`};
+  },
+  function halfIonized(ph){
+    if(ph < 2 || ph > 12) return null;
+    const right = "50 %";
+    return {prompt:`An acid happens to have pKa exactly equal to your measured pH (${fmt(ph)}). What fraction of it is deprotonated?`,
+      type:"mc", options:shuffle([right,"100 %","0 %","25 %"]), answer:right,
+      explain:`When pH = pKa, [HA] = [A⁻]: exactly half has given up its proton. That's the definition point of pKa.`};
+  },
   function kaEstimate(ph){
     if(ph > 6 || !isInt(ph)) return null;
     const pC = rnd([1,2]);               // C = 0.1 or 0.01 M
@@ -155,6 +200,31 @@ const GEN_HARD = [
   },
 ];
 
+/* ---------- daily streak (remembers between visits on this device) ---------- */
+function loadDaily(){
+  try{ return JSON.parse(localStorage.getItem("phw_daily")) || {last:"",streak:0,best:0}; }
+  catch(e){ return {last:"",streak:0,best:0}; }
+}
+function saveDaily(d){ try{ localStorage.setItem("phw_daily", JSON.stringify(d)); }catch(e){} }
+function markDailyRound(){
+  const d = loadDaily();
+  const today = new Date().toISOString().slice(0,10);
+  if(d.last === today) { /* already counted today */ }
+  else {
+    const y = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    d.streak = (d.last === y) ? d.streak + 1 : 1;
+    d.last = today;
+    if(d.streak > d.best) d.best = d.streak;
+    saveDaily(d);
+  }
+  updateDailyChip(d);
+}
+function updateDailyChip(d){
+  d = d || loadDaily();
+  const el = qel("quizDaily");
+  if(el) el.textContent = "📅 " + d.streak + (d.best>d.streak ? " (best "+d.best+")" : "");
+}
+
 /* ---------- round construction ---------- */
 function buildRound(ph, difficulty){
   const pool = difficulty === "hard" ? [...GEN_HARD, ...GEN_NORMAL] : [...GEN_NORMAL];
@@ -179,6 +249,7 @@ function startQuiz(ph, fromScan){
   Q.idx = 0; Q.score = 0;
   Q.questions = buildRound(Q.ph, Q.difficulty);
   qel("quizPhChip").textContent = "pH " + fmt(Q.ph);
+  updateDailyChip();
   showView("learn");
   renderQuestion();
 }
@@ -241,6 +312,7 @@ function nextQuestion(){
   if(Q.idx < Q.questions.length) renderQuestion();
   else {
     qel("quizCard").hidden = true;
+    markDailyRound();
     const s = qel("quizSummary"); s.hidden = false;
     qel("quizScoreLine").textContent = `${Q.score} / ${Q.questions.length}`;
     qel("quizVerdictLine").textContent =
