@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>pH Vision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bench:#14201F;       /* deep lab-bench slate */
+    --panel:#1B2A28;
+    --line:#2A3C38;
+    --paper:#EDF3EF;
+    --dim:#7E938C;
+    --warn:#E0A93E;
+    --reading:#EDF3EF;     /* tinted by JS to the indicator color */
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  body{
+    background:var(--bench);color:var(--paper);
+    font-family:"Archivo",system-ui,sans-serif;
+    display:flex;flex-direction:column;
+    max-width:520px;margin:0 auto;
+  }
+  header{
+    padding:14px 18px 10px;display:flex;align-items:baseline;gap:10px;
+    border-bottom:1px solid var(--line);
+  }
+  header h1{
+    font-size:17px;font-weight:800;letter-spacing:.06em;
+    font-stretch:80%;text-transform:uppercase;
+  }
+  header span{font-size:11px;color:var(--dim);letter-spacing:.04em}
+
+  /* ---- viewfinder ---- */
+  .stage{position:relative;background:#000;aspect-ratio:3/4;overflow:hidden}
+  video,#still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #still{display:none}
+  .reticle{
+    position:absolute;left:50%;top:50%;translate:-50% -50%;
+    width:26%;aspect-ratio:1;border-radius:50%;
+    border:2px solid var(--paper);
+    box-shadow:0 0 0 4000px rgba(10,16,15,.28);
+    pointer-events:none;
+  }
+  .reticle::after{
+    content:"sample";position:absolute;left:50%;top:calc(100% + 6px);
+    translate:-50%;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--paper);
+  }
+  .graybox{
+    position:absolute;left:6%;bottom:6%;width:16%;aspect-ratio:1;
+    border:2px dashed var(--paper);pointer-events:none;
+  }
+  .graybox::after{
+    content:"gray card";position:absolute;left:0;top:calc(100% + 4px);
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--paper);white-space:nowrap;
+  }
+  .stage .offline{
+    position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;
+    align-items:center;justify-content:center;color:var(--dim);
+    font-size:13px;text-align:center;padding:24px;
+  }
+
+  /* ---- controls ---- */
+  .controls{display:flex;gap:10px;padding:14px 18px}
+  button,.filebtn{
+    flex:1;padding:14px 10px;border:1px solid var(--line);
+    border-radius:10px;background:var(--panel);color:var(--paper);
+    font:600 14px "Archivo",sans-serif;letter-spacing:.03em;
+    cursor:pointer;text-align:center;
+  }
+  button.primary{background:var(--paper);color:var(--bench);border-color:var(--paper)}
+  button:focus-visible,.filebtn:focus-within{outline:2px solid var(--paper);outline-offset:2px}
+  input[type=file]{display:none}
+  label.toggle{
+    display:flex;align-items:center;gap:8px;padding:0 18px 6px;
+    font-size:12px;color:var(--dim);
+  }
+
+  /* ---- result ---- */
+  .result{padding:8px 18px 22px;border-top:1px solid var(--line)}
+  .row{display:flex;align-items:baseline;justify-content:space-between}
+  .label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  #phValue{
+    font-family:"Spline Sans Mono",monospace;font-weight:600;
+    font-size:64px;line-height:1.05;color:var(--reading);
+    transition:color .4s;
+  }
+  #phUnc{font-family:"Spline Sans Mono",monospace;font-size:15px;color:var(--dim)}
+  #verdict{font-size:13px;margin-top:2px;min-height:18px}
+  #verdict.warn{color:var(--warn)}
+
+  /* the signature: the indicator spectrum itself as the scale */
+  .scale{position:relative;margin-top:14px;height:34px}
+  .scale .bar{
+    height:12px;border-radius:6px;
+    background:linear-gradient(90deg,
+      #C22F22 0%,   /* pH 1  */
+      #DF6C2A 17%,  /* ~3    */
+      #E7C23A 33%,  /* ~5    */
+      #59A64C 50%,  /* ~7    */
+      #2E8C86 62%,  /* ~8.5  */
+      #2F5FA8 76%,  /* ~10.5 */
+      #5B2E91 100%);/* 13.5  */
+  }
+  .scale .who{
+    position:absolute;top:-4px;height:20px;border:1px solid var(--paper);
+    border-radius:4px;opacity:.55;
+    left:44%;width:16%;  /* pH 6.5 - 8.5 on a 1-13.5 axis */
+  }
+  .scale .needle{
+    position:absolute;top:-7px;width:2px;height:26px;background:var(--paper);
+    left:0;transition:left .5s cubic-bezier(.2,.8,.2,1);
+  }
+  .scale .ticks{
+    display:flex;justify-content:space-between;margin-top:6px;
+    font-family:"Spline Sans Mono",monospace;font-size:10px;color:var(--dim);
+  }
+  @media (prefers-reduced-motion:reduce){
+    .scale .needle,#phValue{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>pH Vision</h1>
+  <span>colorimetric water screening</span>
+</header>
+
+<div class="stage">
+  <video id="cam" playsinline autoplay muted></video>
+  <img id="still" alt="uploaded sample photo">
+  <div class="offline" id="camMsg" hidden>
+    <div>Camera unavailable in this browser context.</div>
+    <div>Use “Upload photo” below — it works everywhere.</div>
+  </div>
+  <div class="reticle"></div>
+  <div class="graybox" id="graybox"></div>
+</div>
+
+<label class="toggle">
+  <input type="checkbox" id="useGray" checked>
+  gray card in frame (dashed box) — corrects for lighting
+</label>
+
+<div class="controls">
+  <button class="primary" id="readBtn">Read pH</button>
+  <label class="filebtn">Upload photo
+    <input type="file" id="fileIn" accept="image/*" capture="environment">
+  </label>
+</div>
+
+<div class="result">
+  <div class="row">
+    <div>
+      <div class="label">estimated pH</div>
+      <div id="phValue">–.–</div>
+    </div>
+    <div id="phUnc"></div>
+  </div>
+  <div id="verdict"></div>
+  <div class="scale">
+    <div class="bar"></div>
+    <div class="who" title="WHO drinking-water guideline 6.5-8.5"></div>
+    <div class="needle" id="needle" style="left:0%"></div>
+    <div class="ticks"><span>1</span><span>4</span><span>7</span><span>10</span><span>13.5</span></div>
+  </div>
+</div>
+
+<canvas id="work" hidden></canvas>
+
+<script>
+const $ = id => document.getElementById(id);
+const video = $("cam"), still = $("still"), work = $("work");
+let usingStill = false;
+
+/* ---- camera ---- */
+(async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }, audio: false
+    });
+    video.srcObject = stream;
+  } catch (e) {
+    video.hidden = true; $("camMsg").hidden = false;
+  }
+})();
+
+/* ---- photo upload fallback ---- */
+$("fileIn").addEventListener("change", ev => {
+  const f = ev.target.files[0];
+  if (!f) return;
+  still.src = URL.createObjectURL(f);
+  still.style.display = "block"; video.style.display = "none";
+  usingStill = true;
+  still.onload = () => readPH();
+});
+
+/* median color of a patch — robust to glare */
+function patchColor(ctx, cx, cy, half) {
+  const d = ctx.getImageData(cx - half, cy - half, half * 2, half * 2).data;
+  const ch = [[], [], []];
+  for (let i = 0; i < d.length; i += 4) {
+    ch[0].push(d[i]); ch[1].push(d[i + 1]); ch[2].push(d[i + 2]);
+  }
+  return ch.map(a => { a.sort((x, y) => x - y); return a[a.length >> 1]; });
+}
+
+function grabColors() {
+  const src = usingStill ? still : video;
+  const w = usingStill ? still.naturalWidth : video.videoWidth;
+  const h = usingStill ? still.naturalHeight : video.videoHeight;
+  if (!w) throw new Error("No image yet");
+  work.width = w; work.height = h;
+  const ctx = work.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(src, 0, 0, w, h);
+  const sample = patchColor(ctx, (w / 2) | 0, (h / 2) | 0, (w * 0.06) | 0);
+  let gray = null;
+  if ($("useGray").checked)
+    gray = patchColor(ctx, (w * 0.14) | 0, (h * 0.86) | 0, (w * 0.05) | 0);
+  return { sample_rgb: sample, gray_rgb: gray };
+}
+
+/* tint the reading with the indicator's own color at that pH */
+const STOPS = [[1,"#C22F22"],[3,"#DF6C2A"],[5,"#E7C23A"],[7,"#59A64C"],
+               [8.5,"#2E8C86"],[10.5,"#2F5FA8"],[13.5,"#5B2E91"]];
+function phColor(ph) {
+  for (let i = 1; i < STOPS.length; i++) {
+    if (ph <= STOPS[i][0]) {
+      const [p0, c0] = STOPS[i - 1], [p1, c1] = STOPS[i];
+      const t = (ph - p0) / (p1 - p0);
+      const hex = s => [1, 3, 5].map(k => parseInt(s.slice(k, k + 2), 16));
+      const a = hex(c0), b = hex(c1);
+      const m = a.map((v, k) => Math.round(v + t * (b[k] - v)));
+      return `rgb(${m[0]},${m[1]},${m[2]})`;
+    }
+  }
+  return STOPS.at(-1)[1];
+}
+
+async function readPH() {
+  const verdict = $("verdict");
+  try {
+    const payload = grabColors();
+    verdict.className = ""; verdict.textContent = "Reading…";
+    const res = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const out = await res.json();
+    if (!res.ok) { verdict.className = "warn"; verdict.textContent = out.error; return; }
+
+    $("phValue").textContent = out.ph.toFixed(2);
+    document.documentElement.style.setProperty("--reading", phColor(out.ph));
+    $("phUnc").textContent = "± " + out.uncertainty.toFixed(2);
+    $("needle").style.left = ((out.ph - 1) / 12.5 * 100).toFixed(1) + "%";
+
+    if (out.low_confidence) {
+      verdict.className = "warn";
+      verdict.textContent = "Low confidence — color unlike training data. Check lighting and gray card.";
+    } else if (out.ph >= 6.5 && out.ph <= 8.5) {
+      verdict.textContent = "Within the WHO drinking-water pH guideline (6.5–8.5).";
+    } else {
+      verdict.className = "warn";
+      verdict.textContent = "Outside the WHO drinking-water pH guideline (6.5–8.5).";
+    }
+  } catch (e) {
+    verdict.className = "warn";
+    verdict.textContent = "Could not read the image: " + e.message;
+  }
+}
+$("readBtn").addEventListener("click", readPH);
+</script>
+</body>
+</html>
