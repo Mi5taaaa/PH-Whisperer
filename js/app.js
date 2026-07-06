@@ -129,18 +129,18 @@ function showPrediction(p){
   if(off){
     off.hidden=false;
     const b=$("quizOfferBtn");
-    b.textContent="Quiz this pH ≈ "+(Math.round(ph*2)/2).toFixed(1)+" →";
+    b.textContent=t("quizThis")+(Math.round(ph*2)/2).toFixed(1)+" →";
     b.onclick=()=>startQuizFromScan(ph);
   }
   const demo=calibration.some(c=>c.demo);
   if(p.nearest>18)
-    setVerdict("Low confidence — this color is far from every calibration point. Check lighting, the gray card, and glare.",true);
+    setVerdict(t("lowConf"),true);
   else if(demo)
-    setVerdict("Reading uses the built-in DEMO calibration. Calibrate with your own indicator before trusting values.",true);
+    setVerdict(t("demoWarn"),true);
   else if(ph>=6.5&&ph<=8.5)
-    setVerdict("Within the WHO drinking-water pH guideline (6.5–8.5).");
+    setVerdict(t("withinWho"));
   else
-    setVerdict("Outside the WHO drinking-water pH guideline (6.5–8.5).",true);
+    setVerdict(t("outsideWho"),true);
 }
 
 /* ---------------- calibrate UI ---------------- */
@@ -250,7 +250,7 @@ function makeCode(){
 function copyCode(){
   if(!lastCode) return;
   navigator.clipboard?.writeText(lastCode).then(
-    ()=>setVerdict("Code copied."),
+    ()=>setVerdict(t("codeCopied")),
     ()=>prompt("Copy this:",lastCode));
 }
 function showQR(){
@@ -283,7 +283,7 @@ function loadCode(){
   try{
     const {name,pts}=decodeCal($("codeIn").value);
     calibration=pts; renderCal();
-    setVerdict(`Loaded calibration ${name?`“${name}” `:""}— ${pts.length} points. Measure away.`);
+    setVerdict(`${t("loaded")} ${name?`“${name}” `:""}— ${pts.length} ${t("points")}. ${t("measureAway")}`);
     $("codeIn").value="";
   }catch(e){ setVerdict("Could not load: "+e.message,true); }
 }
@@ -305,7 +305,7 @@ function setMode(m){
   $("tabCal").setAttribute("aria-selected",m==="calibrate");
   $("paneMeasure").hidden = m!=="measure";
   $("paneCal").hidden = m!=="calibrate";
-  $("actionBtn").textContent = m==="measure"?"Read pH":"Capture reference";
+  $("actionBtn").textContent = m==="measure"?t("readPh"):t("captureRef");
 }
 renderCal();
 
@@ -335,3 +335,6 @@ window.addEventListener("hashchange",()=>{
 /* initial view: a share link opens the app; otherwise honor the hash */
 showView(location.hash.startsWith("#cal=") ? "app" : location.hash.slice(1));
 
+
+/* apply saved language on load */
+applyLang();

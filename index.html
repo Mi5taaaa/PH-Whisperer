@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>pH Whisperer — your phone can read the color</title>
 <meta name="description" content="Point your camera at a pH indicator and read the number. A calmer way to measure pH — for classrooms, fieldwork, and home.">
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4F9367">
+<meta property="og:title" content="pH Whisperer — your phone can read the color">
+<meta property="og:description" content="Free pH readings from a photo of your indicator, plus chemistry quizzes on what you measure.">
+<meta property="og:url" content="https://phwhisperer.com/">
+<meta property="og:image" content="https://phwhisperer.com/img/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -14,6 +23,8 @@
 
 <!-- ================= hero ================= -->
 <div class="wrap">
+<button id="langToggle" class="pill sm langbtn"
+  onclick="setLang(LANG==='en'?'ro':'en')" aria-label="Schimbă limba / switch language">RO</button>
 <section class="hero">
   <svg class="mascot" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A friendly drop of indicator solution">
     <defs>
@@ -167,6 +178,7 @@
     <p>Five questions per round, generated from a pH — scanned or random.</p>
   </div>
   <div class="card">
+    <p class="hint" id="quizLangNote" hidden>Întrebările din quiz sunt deocamdată în engleză — traducerea lor e pe drum.</p>
     <div class="quizbar">
       <span class="chip" id="quizPhChip">pH 7</span>
       <span class="chip" id="quizDaily">📅 0</span>
@@ -368,6 +380,7 @@
 </footer>
 
 <canvas id="work" hidden></canvas>
+<script src="js/i18n.js"></script>
 <script src="js/substances.js"></script>
 <script src="js/questions_custom.js"></script>
 <script src="js/quiz.js"></script>

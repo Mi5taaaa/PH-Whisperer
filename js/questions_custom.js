@@ -1,6 +1,8 @@
 /* ============================================================
    HAND-WRITTEN QUESTION BANK — pH Whisperer
    ============================================================
+   Templates are good at math; humans are good at memorable.
+   Add your own questions here — one is mixed into most rounds.
 
    Format per entry:
    { min: 1, max: 13.5,        <- pH range where this question fits

@@ -436,7 +436,7 @@ function renderQuestion(){
   const q = Q.questions[Q.idx];
   qel("quizSummary").hidden = true;
   qel("quizCard").hidden = false;
-  qel("quizProgress").textContent = `Question ${Q.idx+1} / ${Q.questions.length}`;
+  qel("quizProgress").textContent = `${t("question")} ${Q.idx+1} / ${Q.questions.length}`;
   qel("quizPrompt").textContent = q.prompt;
   const sw = qel("quizSwatch");
   if(sw){ sw.hidden = !q.swatch; if(q.swatch) sw.style.background = q.swatch; }
@@ -473,8 +473,8 @@ function answer(correct, q, btn){
   if(btn && !correct) btn.classList.add("wrong");
   qel("quizNumRow").hidden = true;
   const f = qel("quizFeedback");
-  if(correct){ Q.score++; f.textContent = "Correct! " + q.explain; f.className = "qfeedback ok"; }
-  else { f.textContent = `Not quite — the answer is ${q.answer}. ` + q.explain; f.className = "qfeedback bad"; }
+  if(correct){ Q.score++; f.textContent = t("correct") + q.explain; f.className = "qfeedback ok"; }
+  else { f.textContent = `${t("notQuite")} ${q.answer}. ` + q.explain; f.className = "qfeedback bad"; }
   qel("quizNext").hidden = false;
 }
 function nextQuestion(){
@@ -486,8 +486,13 @@ function nextQuestion(){
     const s = qel("quizSummary"); s.hidden = false;
     qel("quizScoreLine").textContent = `${Q.score} / ${Q.questions.length}`;
     qel("quizVerdictLine").textContent =
-      Q.score === 5 ? "Perfect round — the color has no secrets from you." :
-      Q.score >= 3 ? "Solid! One more round makes it stick." :
-      "Every chemist starts somewhere — try the same pH again.";
+      Q.score === 5 ? t("perfect") :
+      Q.score >= 3 ? t("solid") :
+      t("tryAgain");
   }
 }
+
+/* Enter key submits a numeric answer */
+(function(){ const n = qel("quizNum");
+  if(n) n.addEventListener("keydown", e => { if(e.key === "Enter") submitNum(); });
+})();
