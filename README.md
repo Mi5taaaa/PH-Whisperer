@@ -9,8 +9,7 @@ between user-made calibration points — with an uncertainty value on every
 reading, and an explicit low-confidence warning when the color is unlike
 anything calibrated.
 
-**Live app:** https://mi5taaaa.github.io/PH-Whisperer/ *(update after
-enabling GitHub Pages — see guides/PUBLISHING_GUIDE.md)*
+**Live app:** phwhisperer.com
 
 ## How it works
 
