@@ -27,6 +27,7 @@ const UI_STRINGS = {
     outsideWho: "Outside the WHO drinking-water pH guideline (6.5–8.5).",
     lowConf: "Low confidence — this color is far from every calibration point. Check lighting, the gray card, and glare.",
     demoWarn: "Reading uses the built-in DEMO calibration. Calibrate with your own indicator before trusting values.",
+    flatBand: "Between pH 6 and 10 red cabbage barely shifts colour, so this figure is a rough placement, not a measurement. Read the trend, not the decimals.",
     noCal: "No calibration points yet — add references in the Calibrate tab.",
     measureAway: "Measure away.",
   },
@@ -42,6 +43,7 @@ const UI_STRINGS = {
     outsideWho: "În afara intervalului recomandat de OMS pentru apa potabilă (6,5–8,5).",
     lowConf: "Încredere scăzută — culoarea asta e departe de toate punctele de calibrare. Verifică lumina, cartonul gri și reflexiile.",
     demoWarn: "Citirea folosește calibrarea DEMO inclusă. Calibrează cu indicatorul tău înainte să te bazezi pe valori.",
+    flatBand: "Între pH 6 și 10 varza roșie aproape că nu-și schimbă culoarea, așa că cifra de mai sus e o aproximare, nu o măsurătoare. Uită-te la tendință, nu la zecimale.",
     noCal: "Nu există încă puncte de calibrare — adaugă referințe în fila „Calibrează”.",
     measureAway: "Spor la măsurat!",
   }
@@ -74,8 +76,8 @@ const RO_TEXT = {
   "Datorită cartonului, aplicația poate compensa lumina din jur.",
 "Press Read pH — the color becomes a number, with an honest ± on it.":
   "Apasă „Citește pH-ul” — culoarea devine un număr, însoțit de un ± sincer.",
-"⚗️ Measurement is in beta — our official lab calibration is in the works. Until then, readings use a rough demo calibration: fine for exploring, not for trusting.":
-  "⚗️ Măsurarea e în fază beta — lucrăm la calibrarea oficială de laborator. Până atunci, citirile folosesc o calibrare demo orientativă: numai bună de explorat, dar nu te baza pe ea.",
+"⚗️ Readings use our own calibration, measured from red cabbage (anthocyanin) extract. Use the same extract, or capture your own references in Calibrate. Between pH 6 and 10 this extract changes colour very little, so readings there are approximate.":
+  "⚗️ Citirile folosesc calibrarea noastră, măsurată din extract de varză roșie (antocianine). Folosește același extract sau înregistrează-ți propriile referințe în „Calibrează”. Între pH 6 și 10 extractul își schimbă culoarea foarte puțin, așa că acolo citirile sunt orientative.",
 "Measure":
   "Măsoară",
 "Calibrate":

@@ -2,18 +2,44 @@
 const $ = id => document.getElementById(id);
 let mode = "measure", usingStill = false;
 
-/* ============ demo calibration (approximate universal-indicator colors)
-   Replace with your own: capture references, then Export. ============ */
+/* ============ built-in calibration ============================
+   Red-cabbage (anthocyanin) extract, 22 references measured from photos
+   under a gray card and white-balanced with the same math this app uses.
+   These are REAL measurements, not illustrative colors — but they are
+   specific to that extract. Photographing a different indicator against
+   this set gives meaningless numbers; capture your own references and the
+   built-in set steps aside automatically.
+
+   Known limit: between pH 6 and 10 the extract is so strongly absorbing
+   that every reference lands within a few RGB counts of black (total
+   separation across those 4 pH units is dE ~5, vs dE ~18 across 1.8 units
+   at the acid end). Readings there are reported but flagged. ========== */
 let calibration = [
-  {ph:1,  rgb:[200,49,36],  demo:true},
-  {ph:3,  rgb:[224,110,45], demo:true},
-  {ph:5,  rgb:[229,194,60], demo:true},
-  {ph:7,  rgb:[92,166,78],  demo:true},
-  {ph:8.5,rgb:[49,140,134], demo:true},
-  {ph:10.5,rgb:[50,96,168], demo:true},
-  {ph:12, rgb:[74,60,150],  demo:true},
-  {ph:13.5,rgb:[91,46,145], demo:true},
+  {ph:1.8,  rgb:[107,  1,  6], builtin:true},
+  {ph:2.0,  rgb:[119,  1, 10], builtin:true},
+  {ph:2.7,  rgb:[113,  0, 15], builtin:true},
+  {ph:3.0,  rgb:[119,  0, 27], builtin:true},
+  {ph:3.6,  rgb:[ 99,  1, 33], builtin:true},
+  {ph:4.2,  rgb:[ 88,  1, 24], builtin:true},
+  {ph:4.9,  rgb:[ 49,  1, 20], builtin:true},
+  {ph:5.5,  rgb:[ 28,  1, 13], builtin:true},
+  {ph:5.9,  rgb:[ 15,  1,  7], builtin:true},
+  {ph:6.1,  rgb:[ 10,  3,  5], builtin:true},
+  {ph:6.6,  rgb:[  8, 10,  9], builtin:true},
+  {ph:7.1,  rgb:[ 10,  6,  4], builtin:true},
+  {ph:7.6,  rgb:[ 15,  8,  5], builtin:true},
+  {ph:8.0,  rgb:[  8,  7,  3], builtin:true},
+  {ph:8.4,  rgb:[ 11,  8,  4], builtin:true},
+  {ph:8.8,  rgb:[ 10,  9,  4], builtin:true},
+  {ph:9.2,  rgb:[  8,  9,  4], builtin:true},
+  {ph:10.0, rgb:[  7, 11,  4], builtin:true},
+  {ph:10.7, rgb:[ 23, 21,  3], builtin:true},
+  {ph:11.2, rgb:[ 46, 32,  3], builtin:true},
+  {ph:11.8, rgb:[ 80, 38,  2], builtin:true},
+  {ph:12.0, rgb:[108, 49,  7], builtin:true},
 ];
+/* the flat band where this extract stops discriminating */
+const FLAT_BAND = [6.0, 10.0];
 
 /* ---------------- camera ---------------- */
 (async () => {
@@ -93,7 +119,9 @@ function capture(){
   if(mode==="calibrate"){
     const ph = parseFloat($("calPh").value);
     if(Number.isNaN(ph)){ alert("Enter the known pH of this reference first."); return; }
-    calibration = calibration.filter(c=>!c.demo);   // first real point retires the demo set
+    calibration = calibration.filter(c=>!c.demo && !c.builtin);  // your own reference
+                                                 // retires the built-in set: mixing
+                                                 // two indicators is meaningless
     calibration.push({ph, rgb:balanced.map(Math.round)});
     renderCal();
   } else {
@@ -133,10 +161,16 @@ function showPrediction(p){
     b.onclick=()=>startQuizFromScan(ph);
   }
   const demo=calibration.some(c=>c.demo);
+  const builtin=calibration.some(c=>c.builtin);
   if(p.nearest>18)
     setVerdict(t("lowConf"),true);
   else if(demo)
     setVerdict(t("demoWarn"),true);
+  else if(builtin && ph>=FLAT_BAND[0] && ph<=FLAT_BAND[1])
+    /* deliberately BEFORE withinWho: 6.5-8.5 is drinking-water range, which is
+       exactly where this extract stops discriminating. Saying "within WHO
+       range" there would be confident and unfounded. */
+    setVerdict(t("flatBand"),true);
   else if(ph>=6.5&&ph<=8.5)
     setVerdict(t("withinWho"));
   else
@@ -146,7 +180,7 @@ function showPrediction(p){
 /* ---------------- calibrate UI ---------------- */
 function renderCal(){
   const badge=$("betaBadge");
-  if(badge) badge.hidden = !calibration.some(c=>c.demo);
+  if(badge) badge.hidden = !calibration.some(c=>c.demo || c.builtin);
   const tb=$("calTable").querySelector("tbody");
   tb.innerHTML="";
   calibration.slice().sort((a,b)=>a.ph-b.ph).forEach(c=>{
